@@ -38,7 +38,7 @@ export function setEmbedAuthor(
   embed: EmbedBuilder,
   user: User | GuildMember
 ): EmbedBuilder {
-  const displayUser = user instanceof GuildMember ? user.user : user;
+  const displayUser = 'user' in user && user.user ? user.user : (user as User);
   return embed.setAuthor({
     name: displayUser.tag,
     iconURL: displayUser.displayAvatarURL(),

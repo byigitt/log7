@@ -9,12 +9,12 @@ import {
 } from 'discord.js';
 
 export function formatUser(user: User | GuildMember): string {
-  const u = user instanceof GuildMember ? user.user : user;
+  const u = 'user' in user && user.user ? user.user : (user as User);
   return `${u} (${u.tag} | ${u.id})`;
 }
 
 export function formatUserSimple(user: User | GuildMember): string {
-  const u = user instanceof GuildMember ? user.user : user;
+  const u = 'user' in user && user.user ? user.user : (user as User);
   return `${u.tag} (${u.id})`;
 }
 

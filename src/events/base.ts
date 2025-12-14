@@ -1,4 +1,4 @@
-import { Client, TextChannel, EmbedBuilder, AttachmentBuilder } from 'discord.js';
+import { Client, TextChannel, EmbedBuilder, AttachmentBuilder, ChannelType } from 'discord.js';
 import { EventCategory } from '../types';
 import { GuildConfigService, FilterService } from '../database/services';
 import { FilterCheckParams } from '../types';
@@ -13,8 +13,8 @@ export async function getLogChannel(
 
   try {
     const channel = await client.channels.fetch(channelId);
-    if (channel instanceof TextChannel) {
-      return channel;
+    if (channel && 'send' in channel && (channel.type === ChannelType.GuildText || channel.isTextBased())) {
+      return channel as TextChannel;
     }
   } catch {
     return null;
