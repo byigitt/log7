@@ -27,7 +27,15 @@ async function main() {
     try {
       await command.execute(interaction);
     } catch (error) {
-      logger.error(`Command ${interaction.commandName} error:`, error);
+      await logger.logError(error instanceof Error ? error : new Error(String(error)), {
+        type: 'command',
+        source: interaction.commandName,
+        guildId: interaction.guildId ?? undefined,
+        guildName: interaction.guild?.name,
+        userId: interaction.user.id,
+        userName: interaction.user.tag,
+        channelId: interaction.channelId,
+      });
       const content = 'There was an error executing this command.';
       if (interaction.replied || interaction.deferred) {
         await interaction.followUp({ content, ephemeral: true });
@@ -45,7 +53,10 @@ async function main() {
   await client.login(config.token);
 }
 
-main().catch((error) => {
-  logger.error('Fatal error:', error);
+main().catch(async (error) => {
+  await logger.fatal(error instanceof Error ? error : new Error(String(error)), {
+    type: 'system',
+    source: 'main',
+  });
   process.exit(1);
 });
