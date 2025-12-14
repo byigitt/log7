@@ -7,7 +7,12 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "ts-node src/index.ts",
-    "deploy": "ts-node src/commands/deploy.ts"
+    "deploy": "ts-node src/commands/deploy.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:events": "vitest run tests/events",
+    "test:unit": "vitest run tests/unit"
   },
   "keywords": ["discord", "bot", "logging", "events"],
   "license": "MIT",
@@ -18,8 +23,11 @@
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
+    "@vitest/coverage-v8": "^2.1.8",
+    "mongodb-memory-server": "^10.1.2",
     "ts-node": "^10.9.2",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
   },
   "engines": {
     "node": ">=18.0.0"
