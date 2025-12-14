@@ -1,0 +1,27 @@
+{
+  "name": "log7",
+  "version": "1.0.0",
+  "description": "Fully customizable Discord event logging bot",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "deploy": "ts-node src/commands/deploy.ts"
+  },
+  "keywords": ["discord", "bot", "logging", "events"],
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^14.16.3",
+    "mongoose": "^8.8.3",
+    "dotenv": "^16.4.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
