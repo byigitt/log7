@@ -1,10 +1,10 @@
-import { Client, Collection, REST, Routes } from 'discord.js';
+import { Collection, REST, Routes } from 'discord.js';
 import { Command } from '../types';
 import { logger } from '../utils';
 import * as fs from 'fs';
 import * as path from 'path';
 
-export async function loadCommands(client: Client): Promise<Collection<string, Command>> {
+export async function loadCommands(): Promise<Collection<string, Command>> {
   const commands = new Collection<string, Command>();
   const commandsPath = path.join(__dirname);
 

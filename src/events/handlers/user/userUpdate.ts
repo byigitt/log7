@@ -1,10 +1,10 @@
-import { User, PartialUser } from 'discord.js';
+import { Client, User, PartialUser } from 'discord.js';
 
 // userUpdate is a global event without guild context
 // It only logs to console - no guild-specific logging possible
 export const event = {
   name: 'userUpdate',
-  async execute(_client: unknown, oldUser: User | PartialUser, newUser: User) {
+  async execute(_client: Client<true>, oldUser: User | PartialUser, newUser: User) {
     const changes: string[] = [];
 
     if (oldUser.username !== newUser.username) {

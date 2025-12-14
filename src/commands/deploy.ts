@@ -1,5 +1,4 @@
 import 'dotenv/config';
-import { Collection } from 'discord.js';
 import { loadCommands, deployCommands } from './index';
 import { logger } from '../utils';
 
@@ -13,7 +12,7 @@ async function main() {
     process.exit(1);
   }
 
-  const commands = await loadCommands({ commands: new Collection() } as any);
+  const commands = await loadCommands();
   await deployCommands(token, clientId, commands, guildId);
 }
 

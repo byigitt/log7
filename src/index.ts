@@ -16,7 +16,7 @@ async function main() {
   const client = new LogClient();
 
   client.events = await loadEvents(client);
-  client.commands = await loadCommands(client);
+  client.commands = await loadCommands();
 
   client.on(Events.InteractionCreate, async (interaction) => {
     if (!interaction.isChatInputCommand()) return;
