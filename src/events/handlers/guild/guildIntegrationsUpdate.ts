@@ -1,23 +1,18 @@
-import { Client, Guild } from 'discord.js';
-import { EventHandler } from '../../../types';
-import { getLogChannel, shouldLog, sendLog } from '../../base';
-import { createInfoEmbed } from '../../../utils';
+import { Guild } from 'discord.js';
+import { createHandler } from '../../createHandler';
+import { Embeds, field } from '../../../utils';
 
-export const event: EventHandler<'guildIntegrationsUpdate'> = {
+export const event = createHandler<Guild>({
   name: 'guildIntegrationsUpdate',
-  async execute(client: Client<true>, guild: Guild) {
-    const logChannel = await getLogChannel(client, guild.id, 'guild');
-    if (!logChannel) return;
-
-    const canLog = await shouldLog(guild.id, 'guild', {});
-    if (!canLog) return;
-
-    const embed = createInfoEmbed('Server Integrations Updated')
-      .setDescription('The server integrations have been updated.')
-      .setThumbnail(guild.iconURL());
-
-    await sendLog(logChannel, embed);
-  },
-};
+  category: 'guild',
+  getGuild: (g) => g,
+  createEmbed: (g) => Embeds.info('Integrations Updated', {
+    thumbnail: g.iconURL() || undefined,
+    fields: [
+      field('Server', g.name),
+      field('ID', g.id),
+    ],
+  }),
+});
 
 export default event;

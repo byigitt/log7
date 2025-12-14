@@ -1,46 +1,24 @@
-import { Client, Role } from 'discord.js';
-import { EventHandler } from '../../../types';
-import { getLogChannel, shouldLog, sendLog } from '../../base';
-import { createUpdateEmbed, formatRole } from '../../../utils';
+import { Role } from 'discord.js';
+import { createUpdateHandler } from '../../createHandler';
+import { Embeds, field, roleField, changesField } from '../../../utils';
 
-export const event: EventHandler<'roleUpdate'> = {
+export const event = createUpdateHandler<Role>({
   name: 'roleUpdate',
-  async execute(client: Client<true>, oldRole: Role, newRole: Role) {
-    const logChannel = await getLogChannel(client, newRole.guild.id, 'role');
-    if (!logChannel) return;
-
-    const canLog = await shouldLog(newRole.guild.id, 'role', {});
-    if (!canLog) return;
-
-    const changes: string[] = [];
-
-    if (oldRole.name !== newRole.name) {
-      changes.push(`**Name:** ${oldRole.name} → ${newRole.name}`);
-    }
-    if (oldRole.color !== newRole.color) {
-      changes.push(`**Color:** ${oldRole.hexColor} → ${newRole.hexColor}`);
-    }
-    if (oldRole.hoist !== newRole.hoist) {
-      changes.push(`**Hoisted:** ${oldRole.hoist} → ${newRole.hoist}`);
-    }
-    if (oldRole.mentionable !== newRole.mentionable) {
-      changes.push(`**Mentionable:** ${oldRole.mentionable} → ${newRole.mentionable}`);
-    }
-    if (oldRole.permissions.bitfield !== newRole.permissions.bitfield) {
-      changes.push(`**Permissions:** Changed`);
-    }
-
-    if (changes.length === 0) return;
-
-    const embed = createUpdateEmbed('Role Updated')
-      .setColor(newRole.color || 0x99aab5)
-      .addFields(
-        { name: 'Role', value: formatRole(newRole), inline: false },
-        { name: 'Changes', value: changes.join('\n'), inline: false }
-      );
-
-    await sendLog(logChannel, embed);
-  },
-};
+  category: 'role',
+  getGuild: (_, r) => r.guild,
+  createEmbed: (old, cur) => Embeds.updated('Role', {
+    color: cur.color || undefined,
+    fields: [
+      roleField('Role', cur),
+      changesField([
+        { label: 'Name', old: old.name, new: cur.name },
+        { label: 'Color', old: old.hexColor, new: cur.hexColor },
+        { label: 'Hoisted', old: old.hoist, new: cur.hoist },
+        { label: 'Mentionable', old: old.mentionable, new: cur.mentionable },
+        { label: 'Position', old: old.position, new: cur.position },
+      ]),
+    ],
+  }),
+});
 
 export default event;

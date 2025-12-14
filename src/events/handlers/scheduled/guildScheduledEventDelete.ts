@@ -1,27 +1,18 @@
-import { Client, GuildScheduledEvent, PartialGuildScheduledEvent } from 'discord.js';
-import { EventHandler } from '../../../types';
-import { getLogChannel, shouldLog, sendLog } from '../../base';
-import { createDeleteEmbed } from '../../../utils';
+import { GuildScheduledEvent } from 'discord.js';
+import { createHandler } from '../../createHandler';
+import { Embeds, field } from '../../../utils';
 
-export const event: EventHandler<'guildScheduledEventDelete'> = {
+export const event = createHandler<GuildScheduledEvent>({
   name: 'guildScheduledEventDelete',
-  async execute(client: Client<true>, scheduledEvent: GuildScheduledEvent | PartialGuildScheduledEvent) {
-    if (!scheduledEvent.guild) return;
-
-    const logChannel = await getLogChannel(client, scheduledEvent.guild.id, 'scheduled');
-    if (!logChannel) return;
-
-    const canLog = await shouldLog(scheduledEvent.guild.id, 'scheduled', {});
-    if (!canLog) return;
-
-    const embed = createDeleteEmbed('Scheduled Event Cancelled')
-      .addFields(
-        { name: 'Name', value: scheduledEvent.name || 'Unknown', inline: true },
-        { name: 'ID', value: scheduledEvent.id, inline: true }
-      );
-
-    await sendLog(logChannel, embed);
-  },
-};
+  category: 'scheduled',
+  skip: (e) => !e.guild,
+  getGuild: (e) => e.guild,
+  createEmbed: (e) => Embeds.deleted('Scheduled Event', {
+    fields: [
+      field('Name', e.name),
+      field('ID', e.id),
+    ],
+  }),
+});
 
 export default event;

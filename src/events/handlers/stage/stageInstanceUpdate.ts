@@ -1,37 +1,25 @@
-import { Client, StageInstance } from 'discord.js';
-import { EventHandler } from '../../../types';
-import { getLogChannel, shouldLog, sendLog } from '../../base';
-import { createUpdateEmbed } from '../../../utils';
+import { StageInstance } from 'discord.js';
+import { createUpdateHandler } from '../../createHandler';
+import { Embeds, field, changesField } from '../../../utils';
 
-export const event: EventHandler<'stageInstanceUpdate'> = {
+export const event = createUpdateHandler<StageInstance | null>({
   name: 'stageInstanceUpdate',
-  async execute(client: Client<true>, oldStage: StageInstance | null, newStage: StageInstance) {
-    if (!newStage.guild) return;
-
-    const logChannel = await getLogChannel(client, newStage.guild.id, 'stage');
-    if (!logChannel) return;
-
-    const canLog = await shouldLog(newStage.guild.id, 'stage', {
-      channelId: newStage.channelId,
+  category: 'stage',
+  skip: (old, cur) => !old || !cur,
+  getGuild: (_, s) => s?.guild || null,
+  getFilterParams: (_, s) => ({ channelId: s?.channelId }),
+  createEmbed: (old, cur) => {
+    if (!old || !cur) return null;
+    return Embeds.updated('Stage', {
+      fields: [
+        field('Topic', cur.topic),
+        changesField([
+          { label: 'Topic', old: old.topic, new: cur.topic },
+          { label: 'Privacy', old: old.privacyLevel, new: cur.privacyLevel },
+        ]),
+      ],
     });
-    if (!canLog) return;
-
-    const changes: string[] = [];
-
-    if (oldStage?.topic !== newStage.topic) {
-      changes.push(`**Topic:** ${oldStage?.topic || 'None'} → ${newStage.topic || 'None'}`);
-    }
-
-    if (changes.length === 0) return;
-
-    const embed = createUpdateEmbed('Stage Updated')
-      .addFields(
-        { name: 'Channel', value: `<#${newStage.channelId}>`, inline: true },
-        { name: 'Changes', value: changes.join('\n'), inline: false }
-      );
-
-    await sendLog(logChannel, embed);
   },
-};
+});
 
 export default event;

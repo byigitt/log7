@@ -1,27 +1,19 @@
-import { Client, GuildEmoji } from 'discord.js';
-import { EventHandler } from '../../../types';
-import { getLogChannel, shouldLog, sendLog } from '../../base';
-import { createCreateEmbed } from '../../../utils';
+import { GuildEmoji } from 'discord.js';
+import { createHandler } from '../../createHandler';
+import { Embeds, field } from '../../../utils';
 
-export const event: EventHandler<'emojiCreate'> = {
+export const event = createHandler<GuildEmoji>({
   name: 'emojiCreate',
-  async execute(client: Client<true>, emoji: GuildEmoji) {
-    const logChannel = await getLogChannel(client, emoji.guild.id, 'emoji');
-    if (!logChannel) return;
-
-    const canLog = await shouldLog(emoji.guild.id, 'emoji', {});
-    if (!canLog) return;
-
-    const embed = createCreateEmbed('Emoji Created')
-      .setThumbnail(emoji.url)
-      .addFields(
-        { name: 'Emoji', value: `${emoji} \`:${emoji.name}:\``, inline: true },
-        { name: 'ID', value: emoji.id, inline: true },
-        { name: 'Animated', value: emoji.animated ? 'Yes' : 'No', inline: true }
-      );
-
-    await sendLog(logChannel, embed);
-  },
-};
+  category: 'emoji',
+  getGuild: (e) => e.guild,
+  createEmbed: (e) => Embeds.created('Emoji', {
+    thumbnail: e.url,
+    fields: [
+      field('Emoji', `${e} \`:${e.name}:\``),
+      field('ID', e.id),
+      field('Animated', e.animated),
+    ],
+  }),
+});
 
 export default event;

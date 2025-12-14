@@ -1,31 +1,22 @@
-import { Client, Message, PartialMessage } from 'discord.js';
-import { EventHandler } from '../../../types';
-import { getLogChannel, shouldLog, sendLog } from '../../base';
-import { createDeleteEmbed, formatChannel } from '../../../utils';
+import { Message, PartialMessage, MessageReaction, Collection } from 'discord.js';
+import { createDualArgHandler } from '../../createHandler';
+import { Embeds, field, channelField } from '../../../utils';
 
-export const event: EventHandler<'messageReactionRemoveAll'> = {
+type ReactionCollection = Collection<string, MessageReaction>;
+
+export const event = createDualArgHandler<Message | PartialMessage, ReactionCollection>({
   name: 'messageReactionRemoveAll',
-  async execute(client: Client<true>, message: Message | PartialMessage) {
-    if (!message.guild) return;
-
-    const guild = message.guild;
-
-    const logChannel = await getLogChannel(client, guild.id, 'reaction');
-    if (!logChannel) return;
-
-    const canLog = await shouldLog(guild.id, 'reaction', {
-      channelId: message.channel.id,
-    });
-    if (!canLog) return;
-
-    const embed = createDeleteEmbed('All Reactions Removed')
-      .addFields(
-        { name: 'Channel', value: formatChannel(message.channel), inline: true },
-        { name: 'Message', value: `[Jump](${message.url})`, inline: true }
-      );
-
-    await sendLog(logChannel, embed);
-  },
-};
+  category: 'reaction',
+  skip: (m) => !m.guild,
+  getGuild: (m) => m.guild,
+  getFilterParams: (m) => ({ channelId: m.channelId }),
+  createEmbed: (m, reactions) => Embeds.deleted('All Reactions Removed', {
+    fields: [
+      channelField('Channel', m.channel),
+      field('Message', `[Jump](${m.url})`),
+      field('Reactions Cleared', reactions.size),
+    ],
+  }),
+});
 
 export default event;

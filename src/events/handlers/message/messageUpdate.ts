@@ -1,49 +1,25 @@
-import { Client, Message, PartialMessage } from 'discord.js';
-import { EventHandler } from '../../../types';
-import { getLogChannel, shouldLog, sendLog } from '../../base';
-import { createUpdateEmbed, setEmbedAuthor, formatChannel, truncate } from '../../../utils';
+import { Message, PartialMessage } from 'discord.js';
+import { createUpdateHandler } from '../../createHandler';
+import { Embeds, field, userField, channelField } from '../../../utils';
 
-export const event: EventHandler<'messageUpdate'> = {
+export const event = createUpdateHandler<Message | PartialMessage>({
   name: 'messageUpdate',
-  async execute(client: Client<true>, oldMessage: Message | PartialMessage, newMessage: Message | PartialMessage) {
-    if (!newMessage.guild) return;
-    if (newMessage.author?.bot) return;
-    if (oldMessage.content === newMessage.content) return;
-
-    const guild = newMessage.guild;
-
-    const logChannel = await getLogChannel(client, guild.id, 'message');
-    if (!logChannel) return;
-
-    const canLog = await shouldLog(guild.id, 'message', {
-      userId: newMessage.author?.id,
-      channelId: newMessage.channel.id,
-      categoryId: 'parentId' in newMessage.channel ? newMessage.channel.parentId : null,
-      roleIds: newMessage.member?.roles.cache.map((r) => r.id),
+  category: 'message',
+  skip: (_, m) => !m.guild || m.author?.bot === true,
+  getGuild: (_, m) => m.guild,
+  getFilterParams: (_, m) => ({ userId: m.author?.id, channelId: m.channelId }),
+  createEmbed: (old, cur) => {
+    if (old.content === cur.content) return null;
+    return Embeds.updated('Message', {
+      fields: [
+        cur.author ? userField('Author', cur.author) : field('Author', 'Unknown'),
+        channelField('Channel', cur.channel),
+        field('Before', old.content?.slice(0, 1024) || '*No content*', false),
+        field('After', cur.content?.slice(0, 1024) || '*No content*', false),
+        field('Jump', `[Go to message](${cur.url})`),
+      ],
     });
-    if (!canLog) return;
-
-    const embed = createUpdateEmbed('Message Edited')
-      .addFields(
-        { name: 'Channel', value: formatChannel(newMessage.channel), inline: true },
-        { name: 'Author', value: newMessage.author ? `${newMessage.author.tag} (${newMessage.author.id})` : 'Unknown', inline: true },
-        { name: 'Jump to Message', value: `[Click here](${newMessage.url})`, inline: true }
-      );
-
-    if (oldMessage.content) {
-      embed.addFields({ name: 'Before', value: truncate(oldMessage.content, 1024), inline: false });
-    }
-
-    if (newMessage.content) {
-      embed.addFields({ name: 'After', value: truncate(newMessage.content, 1024), inline: false });
-    }
-
-    if (newMessage.author) {
-      setEmbedAuthor(embed, newMessage.author);
-    }
-
-    await sendLog(logChannel, embed);
   },
-};
+});
 
 export default event;

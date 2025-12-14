@@ -1,27 +1,19 @@
-import { Client, Sticker } from 'discord.js';
-import { EventHandler } from '../../../types';
-import { getLogChannel, shouldLog, sendLog } from '../../base';
-import { createDeleteEmbed } from '../../../utils';
+import { Sticker } from 'discord.js';
+import { createHandler } from '../../createHandler';
+import { Embeds, field } from '../../../utils';
 
-export const event: EventHandler<'stickerDelete'> = {
+export const event = createHandler<Sticker>({
   name: 'stickerDelete',
-  async execute(client: Client<true>, sticker: Sticker) {
-    if (!sticker.guild) return;
-
-    const logChannel = await getLogChannel(client, sticker.guild.id, 'sticker');
-    if (!logChannel) return;
-
-    const canLog = await shouldLog(sticker.guild.id, 'sticker', {});
-    if (!canLog) return;
-
-    const embed = createDeleteEmbed('Sticker Deleted')
-      .addFields(
-        { name: 'Name', value: sticker.name, inline: true },
-        { name: 'ID', value: sticker.id, inline: true }
-      );
-
-    await sendLog(logChannel, embed);
-  },
-};
+  category: 'sticker',
+  skip: (s) => !s.guild,
+  getGuild: (s) => s.guild,
+  createEmbed: (s) => Embeds.deleted('Sticker', {
+    thumbnail: s.url,
+    fields: [
+      field('Name', s.name),
+      field('ID', s.id),
+    ],
+  }),
+});
 
 export default event;

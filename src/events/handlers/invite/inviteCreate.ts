@@ -1,34 +1,23 @@
-import { Client, Invite } from 'discord.js';
-import { EventHandler } from '../../../types';
-import { getLogChannel, shouldLog, sendLog } from '../../base';
-import { createCreateEmbed, formatChannel } from '../../../utils';
+import { Invite } from 'discord.js';
+import { createHandler } from '../../createHandler';
+import { Embeds, field, channelField } from '../../../utils';
 
-export const event: EventHandler<'inviteCreate'> = {
+export const event = createHandler<Invite>({
   name: 'inviteCreate',
-  async execute(client: Client<true>, invite: Invite) {
-    if (!invite.guild) return;
-
-    const logChannel = await getLogChannel(client, invite.guild.id, 'invite');
-    if (!logChannel) return;
-
-    const canLog = await shouldLog(invite.guild.id, 'invite', {
-      userId: invite.inviterId || undefined,
-      channelId: invite.channel?.id,
-    });
-    if (!canLog) return;
-
-    const embed = createCreateEmbed('Invite Created')
-      .addFields(
-        { name: 'Code', value: invite.code, inline: true },
-        { name: 'Channel', value: invite.channel ? formatChannel(invite.channel) : 'Unknown', inline: true },
-        { name: 'Created By', value: invite.inviter ? `${invite.inviter.tag}` : 'Unknown', inline: true },
-        { name: 'Max Uses', value: invite.maxUses?.toString() || 'Unlimited', inline: true },
-        { name: 'Expires', value: invite.expiresAt ? `<t:${Math.floor(invite.expiresAt.getTime() / 1000)}:R>` : 'Never', inline: true },
-        { name: 'Temporary', value: invite.temporary ? 'Yes' : 'No', inline: true }
-      );
-
-    await sendLog(logChannel, embed);
-  },
-};
+  category: 'invite',
+  skip: (i) => !i.guild,
+  getGuild: (i) => i.guild,
+  getFilterParams: (i) => ({ userId: i.inviterId || undefined, channelId: i.channel?.id }),
+  createEmbed: (i) => Embeds.created('Invite', {
+    fields: [
+      field('Code', i.code),
+      i.channel ? channelField('Channel', i.channel) : field('Channel', 'Unknown'),
+      field('Created By', i.inviter?.tag || 'Unknown'),
+      field('Max Uses', i.maxUses || 'Unlimited'),
+      field('Expires', i.expiresAt ? `<t:${Math.floor(i.expiresAt.getTime() / 1000)}:R>` : 'Never'),
+      field('Temporary', i.temporary),
+    ],
+  }),
+});
 
 export default event;

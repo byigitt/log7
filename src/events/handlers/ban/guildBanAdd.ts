@@ -1,30 +1,19 @@
-import { Client, GuildBan } from 'discord.js';
-import { EventHandler } from '../../../types';
-import { getLogChannel, shouldLog, sendLog } from '../../base';
-import { createDeleteEmbed, formatUser, setEmbedAuthor } from '../../../utils';
+import { GuildBan } from 'discord.js';
+import { createHandler } from '../../createHandler';
+import { Embeds, field, userField } from '../../../utils';
 
-export const event: EventHandler<'guildBanAdd'> = {
+export const event = createHandler<GuildBan>({
   name: 'guildBanAdd',
-  async execute(client: Client<true>, ban: GuildBan) {
-    const logChannel = await getLogChannel(client, ban.guild.id, 'ban');
-    if (!logChannel) return;
-
-    const canLog = await shouldLog(ban.guild.id, 'ban', {
-      userId: ban.user.id,
-    });
-    if (!canLog) return;
-
-    const embed = createDeleteEmbed('Member Banned')
-      .addFields(
-        { name: 'User', value: formatUser(ban.user), inline: false },
-        { name: 'Reason', value: ban.reason || 'No reason provided', inline: false }
-      )
-      .setThumbnail(ban.user.displayAvatarURL());
-
-    setEmbedAuthor(embed, ban.user);
-
-    await sendLog(logChannel, embed);
-  },
-};
+  category: 'ban',
+  getGuild: (b) => b.guild,
+  getFilterParams: (b) => ({ userId: b.user.id }),
+  createEmbed: (b) => Embeds.deleted('User Banned', {
+    thumbnail: b.user.displayAvatarURL(),
+    fields: [
+      userField('User', b.user),
+      field('Reason', b.reason || 'No reason provided', false),
+    ],
+  }),
+});
 
 export default event;

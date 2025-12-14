@@ -1,65 +1,61 @@
-import { Client, VoiceState } from 'discord.js';
-import { EventHandler } from '../../../types';
-import { getLogChannel, shouldLog, sendLog } from '../../base';
-import { createEmbed, formatUser } from '../../../utils';
-import { Colors } from '../../../constants';
+import { VoiceState } from 'discord.js';
+import { createUpdateHandler } from '../../createHandler';
+import { Embeds, field, userField, channelField } from '../../../utils';
 
-export const event: EventHandler<'voiceStateUpdate'> = {
+export const event = createUpdateHandler<VoiceState>({
   name: 'voiceStateUpdate',
-  async execute(client: Client<true>, oldState: VoiceState, newState: VoiceState) {
-    if (!newState.guild) return;
-    if (newState.member?.user.bot) return;
+  category: 'voice',
+  skip: (old, cur) => !cur.guild || cur.member?.user.bot === true,
+  getGuild: (_, s) => s.guild,
+  getFilterParams: (_, s) => ({ userId: s.member?.id, channelId: s.channelId || undefined }),
+  createEmbed: (old, cur) => {
+    const member = cur.member || old.member;
+    if (!member) return null;
 
-    const guild = newState.guild;
-
-    const logChannel = await getLogChannel(client, guild.id, 'voice');
-    if (!logChannel) return;
-
-    const canLog = await shouldLog(guild.id, 'voice', {
-      userId: newState.member?.id,
-      channelId: newState.channelId || oldState.channelId || undefined,
-    });
-    if (!canLog) return;
-
-    const member = newState.member || oldState.member;
-    if (!member) return;
-
-    let action = '';
-    let color: number = Colors.BLUE;
-
-    if (!oldState.channelId && newState.channelId) {
-      action = `Joined ${newState.channel}`;
-      color = Colors.GREEN;
-    } else if (oldState.channelId && !newState.channelId) {
-      action = `Left ${oldState.channel}`;
-      color = Colors.RED;
-    } else if (oldState.channelId !== newState.channelId) {
-      action = `Moved from ${oldState.channel} to ${newState.channel}`;
-      color = Colors.YELLOW;
-    } else if (oldState.selfMute !== newState.selfMute) {
-      action = newState.selfMute ? 'Self-muted' : 'Self-unmuted';
-    } else if (oldState.selfDeaf !== newState.selfDeaf) {
-      action = newState.selfDeaf ? 'Self-deafened' : 'Self-undeafened';
-    } else if (oldState.serverMute !== newState.serverMute) {
-      action = newState.serverMute ? 'Server-muted' : 'Server-unmuted';
-    } else if (oldState.serverDeaf !== newState.serverDeaf) {
-      action = newState.serverDeaf ? 'Server-deafened' : 'Server-undeafened';
-    } else if (oldState.streaming !== newState.streaming) {
-      action = newState.streaming ? 'Started streaming' : 'Stopped streaming';
-    } else if (oldState.selfVideo !== newState.selfVideo) {
-      action = newState.selfVideo ? 'Turned on camera' : 'Turned off camera';
-    } else {
-      return;
+    // Voice channel change
+    if (old.channelId !== cur.channelId) {
+      if (!old.channelId && cur.channelId) {
+        return Embeds.created('Voice Joined', {
+          fields: [
+            userField('Member', member),
+            cur.channel ? channelField('Channel', cur.channel) : field('Channel', `<#${cur.channelId}>`),
+          ],
+        });
+      }
+      if (old.channelId && !cur.channelId) {
+        return Embeds.deleted('Voice Left', {
+          fields: [
+            userField('Member', member),
+            old.channel ? channelField('Channel', old.channel) : field('Channel', `<#${old.channelId}>`),
+          ],
+        });
+      }
+      return Embeds.updated('Voice Moved', {
+        fields: [
+          userField('Member', member),
+          old.channel ? channelField('From', old.channel) : field('From', `<#${old.channelId}>`),
+          cur.channel ? channelField('To', cur.channel) : field('To', `<#${cur.channelId}>`),
+        ],
+      });
     }
 
-    const embed = createEmbed(color, 'Voice State Update')
-      .addFields(
-        { name: 'Member', value: formatUser(member), inline: true },
-        { name: 'Action', value: action, inline: true }
-      );
+    // Mute/Deaf changes
+    if (old.selfMute !== cur.selfMute || old.selfDeaf !== cur.selfDeaf || 
+        old.serverMute !== cur.serverMute || old.serverDeaf !== cur.serverDeaf) {
+      return Embeds.info('Voice State Changed', {
+        fields: [
+          userField('Member', member),
+          cur.channel ? channelField('Channel', cur.channel) : null,
+          field('Self Mute', cur.selfMute),
+          field('Self Deaf', cur.selfDeaf),
+          field('Server Mute', cur.serverMute),
+          field('Server Deaf', cur.serverDeaf),
+        ],
+      });
+    }
 
-    await sendLog(logChannel, embed);
+    return null;
   },
-};
+});
 
 export default event;

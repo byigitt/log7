@@ -1,45 +1,27 @@
-import { Client, GuildScheduledEvent, PartialGuildScheduledEvent } from 'discord.js';
-import { EventHandler } from '../../../types';
-import { getLogChannel, shouldLog, sendLog } from '../../base';
-import { createUpdateEmbed } from '../../../utils';
+import { GuildScheduledEvent } from 'discord.js';
+import { createUpdateHandler } from '../../createHandler';
+import { Embeds, field, changesField } from '../../../utils';
 
-export const event: EventHandler<'guildScheduledEventUpdate'> = {
+export const event = createUpdateHandler<GuildScheduledEvent | null>({
   name: 'guildScheduledEventUpdate',
-  async execute(
-    client: Client<true>,
-    oldEvent: GuildScheduledEvent | PartialGuildScheduledEvent | null,
-    newEvent: GuildScheduledEvent
-  ) {
-    if (!newEvent.guild) return;
-
-    const logChannel = await getLogChannel(client, newEvent.guild.id, 'scheduled');
-    if (!logChannel) return;
-
-    const canLog = await shouldLog(newEvent.guild.id, 'scheduled', {});
-    if (!canLog) return;
-
-    const changes: string[] = [];
-
-    if (oldEvent?.name !== newEvent.name) {
-      changes.push(`**Name:** ${oldEvent?.name || 'Unknown'} → ${newEvent.name}`);
-    }
-    if (oldEvent?.description !== newEvent.description) {
-      changes.push(`**Description:** Changed`);
-    }
-    if (oldEvent?.status !== newEvent.status) {
-      changes.push(`**Status:** ${oldEvent?.status || 'Unknown'} → ${newEvent.status}`);
-    }
-
-    if (changes.length === 0) return;
-
-    const embed = createUpdateEmbed('Scheduled Event Updated')
-      .addFields(
-        { name: 'Event', value: newEvent.name, inline: true },
-        { name: 'Changes', value: changes.join('\n'), inline: false }
-      );
-
-    await sendLog(logChannel, embed);
+  category: 'scheduled',
+  skip: (old, cur) => !old || !cur || !cur.guild,
+  getGuild: (_, cur) => cur?.guild || null,
+  createEmbed: (old, cur) => {
+    if (!old || !cur) return null;
+    return Embeds.updated('Scheduled Event', {
+      thumbnail: cur.coverImageURL?.() || undefined,
+      fields: [
+        field('Name', cur.name),
+        changesField([
+          { label: 'Name', old: old.name, new: cur.name },
+          { label: 'Description', old: old.description, new: cur.description },
+          { label: 'Status', old: old.status, new: cur.status },
+          { label: 'Location', old: old.channel?.name || old.entityMetadata?.location, new: cur.channel?.name || cur.entityMetadata?.location },
+        ]),
+      ],
+    });
   },
-};
+});
 
 export default event;

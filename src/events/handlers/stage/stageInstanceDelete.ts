@@ -1,29 +1,18 @@
-import { Client, StageInstance } from 'discord.js';
-import { EventHandler } from '../../../types';
-import { getLogChannel, shouldLog, sendLog } from '../../base';
-import { createDeleteEmbed } from '../../../utils';
+import { StageInstance } from 'discord.js';
+import { createHandler } from '../../createHandler';
+import { Embeds, field } from '../../../utils';
 
-export const event: EventHandler<'stageInstanceDelete'> = {
+export const event = createHandler<StageInstance>({
   name: 'stageInstanceDelete',
-  async execute(client: Client<true>, stageInstance: StageInstance) {
-    if (!stageInstance.guild) return;
-
-    const logChannel = await getLogChannel(client, stageInstance.guild.id, 'stage');
-    if (!logChannel) return;
-
-    const canLog = await shouldLog(stageInstance.guild.id, 'stage', {
-      channelId: stageInstance.channelId,
-    });
-    if (!canLog) return;
-
-    const embed = createDeleteEmbed('Stage Ended')
-      .addFields(
-        { name: 'Topic', value: stageInstance.topic || 'No topic', inline: true },
-        { name: 'Channel', value: `<#${stageInstance.channelId}>`, inline: true }
-      );
-
-    await sendLog(logChannel, embed);
-  },
-};
+  category: 'stage',
+  getGuild: (s) => s.guild,
+  getFilterParams: (s) => ({ channelId: s.channelId }),
+  createEmbed: (s) => Embeds.deleted('Stage', {
+    fields: [
+      field('Topic', s.topic),
+      field('Channel ID', s.channelId),
+    ],
+  }),
+});
 
 export default event;

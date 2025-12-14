@@ -1,29 +1,19 @@
-import { Client, Invite } from 'discord.js';
-import { EventHandler } from '../../../types';
-import { getLogChannel, shouldLog, sendLog } from '../../base';
-import { createDeleteEmbed, formatChannel } from '../../../utils';
+import { Invite } from 'discord.js';
+import { createHandler } from '../../createHandler';
+import { Embeds, field, channelField } from '../../../utils';
 
-export const event: EventHandler<'inviteDelete'> = {
+export const event = createHandler<Invite>({
   name: 'inviteDelete',
-  async execute(client: Client<true>, invite: Invite) {
-    if (!invite.guild) return;
-
-    const logChannel = await getLogChannel(client, invite.guild.id, 'invite');
-    if (!logChannel) return;
-
-    const canLog = await shouldLog(invite.guild.id, 'invite', {
-      channelId: invite.channel?.id,
-    });
-    if (!canLog) return;
-
-    const embed = createDeleteEmbed('Invite Deleted')
-      .addFields(
-        { name: 'Code', value: invite.code, inline: true },
-        { name: 'Channel', value: invite.channel ? formatChannel(invite.channel) : 'Unknown', inline: true }
-      );
-
-    await sendLog(logChannel, embed);
-  },
-};
+  category: 'invite',
+  skip: (i) => !i.guild,
+  getGuild: (i) => i.guild,
+  getFilterParams: (i) => ({ channelId: i.channel?.id }),
+  createEmbed: (i) => Embeds.deleted('Invite', {
+    fields: [
+      field('Code', i.code),
+      i.channel ? channelField('Channel', i.channel) : field('Channel', 'Unknown'),
+    ],
+  }),
+});
 
 export default event;

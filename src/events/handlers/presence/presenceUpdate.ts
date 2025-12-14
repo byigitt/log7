@@ -1,32 +1,22 @@
-import { Client, Presence } from 'discord.js';
-import { EventHandler } from '../../../types';
-import { getLogChannel, shouldLog, sendLog } from '../../base';
-import { createInfoEmbed, formatUser } from '../../../utils';
+import { Presence } from 'discord.js';
+import { createUpdateHandler } from '../../createHandler';
+import { Embeds, field, userField } from '../../../utils';
 
-export const event: EventHandler<'presenceUpdate'> = {
+export const event = createUpdateHandler<Presence | null>({
   name: 'presenceUpdate',
-  async execute(client: Client<true>, oldPresence: Presence | null, newPresence: Presence) {
-    if (!newPresence.guild) return;
-    if (newPresence.user?.bot) return;
-
-    const logChannel = await getLogChannel(client, newPresence.guild.id, 'presence');
-    if (!logChannel) return;
-
-    const canLog = await shouldLog(newPresence.guild.id, 'presence', {
-      userId: newPresence.userId,
+  category: 'presence',
+  skip: (old, cur) => !cur?.guild || cur.user?.bot === true || old?.status === cur?.status,
+  getGuild: (_, p) => p?.guild || null,
+  getFilterParams: (_, p) => ({ userId: p?.userId }),
+  createEmbed: (old, cur) => {
+    if (!cur) return null;
+    return Embeds.info('Presence Updated', {
+      fields: [
+        cur.user ? userField('User', cur.user) : field('User', `<@${cur.userId}>`),
+        field('Status', `${old?.status || 'offline'} → ${cur.status}`),
+      ],
     });
-    if (!canLog) return;
-
-    if (oldPresence?.status === newPresence.status) return;
-
-    const embed = createInfoEmbed('Presence Updated')
-      .addFields(
-        { name: 'User', value: newPresence.user ? formatUser(newPresence.user) : `<@${newPresence.userId}>`, inline: true },
-        { name: 'Status', value: `${oldPresence?.status || 'offline'} → ${newPresence.status}`, inline: true }
-      );
-
-    await sendLog(logChannel, embed);
   },
-};
+});
 
 export default event;

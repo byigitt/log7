@@ -1,36 +1,23 @@
-import { Client, Sticker } from 'discord.js';
-import { EventHandler } from '../../../types';
-import { getLogChannel, shouldLog, sendLog } from '../../base';
-import { createUpdateEmbed } from '../../../utils';
+import { Sticker } from 'discord.js';
+import { createUpdateHandler } from '../../createHandler';
+import { Embeds, field, changesField } from '../../../utils';
 
-export const event: EventHandler<'stickerUpdate'> = {
+export const event = createUpdateHandler<Sticker>({
   name: 'stickerUpdate',
-  async execute(client: Client<true>, oldSticker: Sticker, newSticker: Sticker) {
-    if (!newSticker.guild) return;
-
-    const logChannel = await getLogChannel(client, newSticker.guild.id, 'sticker');
-    if (!logChannel) return;
-
-    const canLog = await shouldLog(newSticker.guild.id, 'sticker', {});
-    if (!canLog) return;
-
-    const changes: string[] = [];
-
-    if (oldSticker.name !== newSticker.name) {
-      changes.push(`**Name:** ${oldSticker.name} → ${newSticker.name}`);
-    }
-    if (oldSticker.description !== newSticker.description) {
-      changes.push(`**Description:** ${oldSticker.description || 'None'} → ${newSticker.description || 'None'}`);
-    }
-
-    if (changes.length === 0) return;
-
-    const embed = createUpdateEmbed('Sticker Updated')
-      .setThumbnail(newSticker.url)
-      .addFields({ name: 'Changes', value: changes.join('\n'), inline: false });
-
-    await sendLog(logChannel, embed);
-  },
-};
+  category: 'sticker',
+  skip: (_, s) => !s.guild,
+  getGuild: (_, s) => s.guild,
+  createEmbed: (old, cur) => Embeds.updated('Sticker', {
+    thumbnail: cur.url,
+    fields: [
+      field('Name', cur.name),
+      field('ID', cur.id),
+      changesField([
+        { label: 'Name', old: old.name, new: cur.name },
+        { label: 'Description', old: old.description, new: cur.description },
+      ]),
+    ],
+  }),
+});
 
 export default event;
