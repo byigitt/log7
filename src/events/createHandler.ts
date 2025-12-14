@@ -1,6 +1,7 @@
 import { Client, EmbedBuilder, Guild, AttachmentBuilder } from 'discord.js';
 import { EventCategory, FilterCheckParams } from '../types';
 import { getLogChannel, shouldLog, sendLog } from './base';
+import { logger } from '../utils';
 
 export interface HandlerConfig<T> {
   name: string;
@@ -30,25 +31,50 @@ export interface DualArgHandlerConfig<T, U> {
   skip?: (arg1: T, arg2: U) => boolean;
 }
 
+function extractGuildId(guild: Guild | { id: string } | string | null): string | null {
+  if (!guild) return null;
+  return typeof guild === 'string' ? guild : guild.id;
+}
+
+function extractGuildName(guild: Guild | { id: string } | null): string | undefined {
+  if (!guild) return undefined;
+  return 'name' in guild ? (guild as Guild).name : undefined;
+}
+
 export function createHandler<T>(config: HandlerConfig<T>) {
   return {
     name: config.name,
     async execute(client: Client<true>, data: T) {
-      if (config.skip?.(data)) return;
+      let guildId: string | null = null;
+      let guildName: string | undefined;
 
-      const guild = config.getGuild(data);
-      if (!guild) return;
+      try {
+        if (config.skip?.(data)) return;
 
-      const guildId = typeof guild === 'string' ? guild : guild.id;
-      const logChannel = await getLogChannel(client, guildId, config.category);
-      if (!logChannel) return;
+        const guild = config.getGuild(data);
+        if (!guild) return;
 
-      const filterParams = config.getFilterParams?.(data) ?? {};
-      if (!await shouldLog(guildId, config.category, filterParams)) return;
+        guildId = extractGuildId(guild);
+        guildName = extractGuildName(guild);
+        if (!guildId) return;
 
-      const embed = config.createEmbed(data);
-      const attachments = config.getAttachments?.(data);
-      await sendLog(logChannel, embed, attachments);
+        const logChannel = await getLogChannel(client, guildId, config.category);
+        if (!logChannel) return;
+
+        const filterParams = config.getFilterParams?.(data) ?? {};
+        if (!await shouldLog(guildId, config.category, filterParams)) return;
+
+        const embed = config.createEmbed(data);
+        const attachments = config.getAttachments?.(data);
+        await sendLog(logChannel, embed, attachments);
+      } catch (error) {
+        await logger.logError(error instanceof Error ? error : new Error(String(error)), {
+          type: 'event',
+          source: config.name,
+          guildId: guildId ?? undefined,
+          guildName,
+        });
+      }
     },
   };
 }
@@ -57,22 +83,37 @@ export function createUpdateHandler<T>(config: UpdateHandlerConfig<T>) {
   return {
     name: config.name,
     async execute(client: Client<true>, oldData: T, newData: T) {
-      if (config.skip?.(oldData, newData)) return;
+      let guildId: string | null = null;
+      let guildName: string | undefined;
 
-      const guild = config.getGuild(oldData, newData);
-      if (!guild) return;
+      try {
+        if (config.skip?.(oldData, newData)) return;
 
-      const guildId = typeof guild === 'string' ? guild : guild.id;
-      const logChannel = await getLogChannel(client, guildId, config.category);
-      if (!logChannel) return;
+        const guild = config.getGuild(oldData, newData);
+        if (!guild) return;
 
-      const filterParams = config.getFilterParams?.(oldData, newData) ?? {};
-      if (!await shouldLog(guildId, config.category, filterParams)) return;
+        guildId = extractGuildId(guild);
+        guildName = extractGuildName(guild);
+        if (!guildId) return;
 
-      const embed = config.createEmbed(oldData, newData);
-      if (!embed) return;
-      
-      await sendLog(logChannel, embed);
+        const logChannel = await getLogChannel(client, guildId, config.category);
+        if (!logChannel) return;
+
+        const filterParams = config.getFilterParams?.(oldData, newData) ?? {};
+        if (!await shouldLog(guildId, config.category, filterParams)) return;
+
+        const embed = config.createEmbed(oldData, newData);
+        if (!embed) return;
+        
+        await sendLog(logChannel, embed);
+      } catch (error) {
+        await logger.logError(error instanceof Error ? error : new Error(String(error)), {
+          type: 'event',
+          source: config.name,
+          guildId: guildId ?? undefined,
+          guildName,
+        });
+      }
     },
   };
 }
@@ -81,22 +122,37 @@ export function createDualArgHandler<T, U>(config: DualArgHandlerConfig<T, U>) {
   return {
     name: config.name,
     async execute(client: Client<true>, arg1: T, arg2: U) {
-      if (config.skip?.(arg1, arg2)) return;
+      let guildId: string | null = null;
+      let guildName: string | undefined;
 
-      const guild = config.getGuild(arg1, arg2);
-      if (!guild) return;
+      try {
+        if (config.skip?.(arg1, arg2)) return;
 
-      const guildId = typeof guild === 'string' ? guild : guild.id;
-      const logChannel = await getLogChannel(client, guildId, config.category);
-      if (!logChannel) return;
+        const guild = config.getGuild(arg1, arg2);
+        if (!guild) return;
 
-      const filterParams = config.getFilterParams?.(arg1, arg2) ?? {};
-      if (!await shouldLog(guildId, config.category, filterParams)) return;
+        guildId = extractGuildId(guild);
+        guildName = extractGuildName(guild);
+        if (!guildId) return;
 
-      const embed = config.createEmbed(arg1, arg2);
-      if (!embed) return;
-      
-      await sendLog(logChannel, embed);
+        const logChannel = await getLogChannel(client, guildId, config.category);
+        if (!logChannel) return;
+
+        const filterParams = config.getFilterParams?.(arg1, arg2) ?? {};
+        if (!await shouldLog(guildId, config.category, filterParams)) return;
+
+        const embed = config.createEmbed(arg1, arg2);
+        if (!embed) return;
+        
+        await sendLog(logChannel, embed);
+      } catch (error) {
+        await logger.logError(error instanceof Error ? error : new Error(String(error)), {
+          type: 'event',
+          source: config.name,
+          guildId: guildId ?? undefined,
+          guildName,
+        });
+      }
     },
   };
 }
