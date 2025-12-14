@@ -1,3 +1,6 @@
+import { ErrorLogService, LogErrorParams } from '../database/services/errorLog';
+import { IErrorContext, ErrorType } from '../database/models/ErrorLog';
+
 const colors = {
   reset: '\x1b[0m',
   red: '\x1b[31m',
@@ -11,6 +14,11 @@ const colors = {
 
 function timestamp(): string {
   return new Date().toISOString();
+}
+
+export interface ErrorLogContext extends IErrorContext {
+  type: ErrorType;
+  source: string;
 }
 
 export const logger = {
@@ -38,5 +46,69 @@ export const logger = {
 
   event(eventName: string, guildName: string): void {
     console.log(`${colors.grey}[${timestamp()}]${colors.reset} ${colors.cyan}[EVENT]${colors.reset}`, `${eventName} in ${guildName}`);
+  },
+
+  // Database-backed error logging
+  async logError(error: Error | string, context: ErrorLogContext): Promise<void> {
+    const message = error instanceof Error ? error.message : error;
+    console.error(
+      `${colors.grey}[${timestamp()}]${colors.reset} ${colors.red}[ERROR]${colors.reset}`,
+      `[${context.type}:${context.source}]`,
+      message
+    );
+
+    try {
+      await ErrorLogService.log({
+        level: 'error',
+        type: context.type,
+        source: context.source,
+        error,
+        context,
+      });
+    } catch (dbError) {
+      console.error(`${colors.grey}[${timestamp()}]${colors.reset} ${colors.red}[DB-ERROR]${colors.reset}`, 'Failed to save error log:', dbError);
+    }
+  },
+
+  async logWarn(error: Error | string, context: ErrorLogContext): Promise<void> {
+    const message = error instanceof Error ? error.message : error;
+    console.warn(
+      `${colors.grey}[${timestamp()}]${colors.reset} ${colors.yellow}[WARN]${colors.reset}`,
+      `[${context.type}:${context.source}]`,
+      message
+    );
+
+    try {
+      await ErrorLogService.log({
+        level: 'warn',
+        type: context.type,
+        source: context.source,
+        error,
+        context,
+      });
+    } catch (dbError) {
+      console.error(`${colors.grey}[${timestamp()}]${colors.reset} ${colors.red}[DB-ERROR]${colors.reset}`, 'Failed to save error log:', dbError);
+    }
+  },
+
+  async fatal(error: Error | string, context: ErrorLogContext): Promise<void> {
+    const message = error instanceof Error ? error.message : error;
+    console.error(
+      `${colors.grey}[${timestamp()}]${colors.reset} ${colors.red}[FATAL]${colors.reset}`,
+      `[${context.type}:${context.source}]`,
+      message
+    );
+
+    try {
+      await ErrorLogService.log({
+        level: 'fatal',
+        type: context.type,
+        source: context.source,
+        error,
+        context,
+      });
+    } catch (dbError) {
+      console.error(`${colors.grey}[${timestamp()}]${colors.reset} ${colors.red}[DB-ERROR]${colors.reset}`, 'Failed to save error log:', dbError);
+    }
   },
 };
