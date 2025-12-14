@@ -9,6 +9,9 @@ A fully customizable Discord event logging bot with multi-guild support.
 - **Attachment preservation** - downloads and re-uploads attachments to preserve them
 - **Whitelist/Blacklist** - filter by users, roles, channels, or categories
 - **Slash commands** - easy configuration via `/logging` command
+- **Error logging** - persistent error tracking with MongoDB
+- **DRY architecture** - handler factories and utility helpers for maintainability
+- **Full test coverage** - 166 tests across all components
 
 ## Event Categories
 
@@ -104,10 +107,28 @@ src/
 ├── config/            # Environment configuration
 ├── constants/         # Intents, partials, colors, categories
 ├── database/          # MongoDB models and services
+│   ├── models/        # GuildConfig, Filter, ErrorLog
+│   └── services/      # CRUD operations + error logging
 ├── events/            # Event handlers
+│   ├── createHandler.ts  # DRY handler factories
+│   ├── base.ts        # Core logging functions
+│   └── handlers/      # 47 event handlers (19 categories)
 ├── commands/          # Slash commands
 ├── types/             # TypeScript type definitions
 └── utils/             # Utility functions
+    ├── logger.ts      # Console + DB error logging
+    ├── embeds.ts      # Embed factory (Embeds.created/deleted/updated/info)
+    ├── fields.ts      # Field helpers (field, userField, channelField, etc.)
+    └── ...            # formatters, diffing, attachment
+```
+
+## Testing
+
+```bash
+pnpm test           # Run all 166 tests
+pnpm test:watch     # Watch mode
+pnpm test:coverage  # With coverage
+pnpm typecheck      # TypeScript validation
 ```
 
 ## License

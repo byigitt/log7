@@ -1,6 +1,6 @@
 # Tests
 
-Test suite for Log7 event logging bot.
+Test suite for Log7 event logging bot. **166 tests** across 50 test files.
 
 ## Structure
 
@@ -14,18 +14,18 @@ tests/
 │   ├── member.ts         # Mock members/users
 │   └── message.ts        # Mock messages
 ├── helpers/
-│   └── testUtils.ts      # Test utility functions
+│   └── testUtils.ts      # DRY test utilities (TEST_IDS, createTestContext, etc.)
 ├── unit/                 # Unit tests
-│   ├── utils/            # Utility function tests
-│   └── database/         # Database service tests
+│   ├── utils/            # Utility function tests (embed, formatters, diffing)
+│   └── database/         # Database service tests (guildConfig, filter, errorLog)
 └── events/               # Event handler tests (by category)
-    ├── channel/
-    ├── member/
-    ├── message/
-    ├── role/
-    ├── voice/
-    ├── ban/
-    └── ...
+    ├── channel/          # 4 tests
+    ├── member/           # 6 tests
+    ├── message/          # 6 tests
+    ├── role/             # 6 tests
+    ├── voice/            # 2 tests
+    ├── ban/              # 4 tests
+    └── ...               # All 19 categories covered
 ```
 
 ## Running Tests
@@ -45,39 +45,58 @@ pnpm test:events
 
 # Run only unit tests
 pnpm test:unit
+
+# TypeScript validation
+pnpm typecheck
 ```
 
 ## Test Coverage
 
+### Event Handler Tests
 Each event handler test covers:
 1. Log IS sent when event fires and category is enabled
 2. Log is NOT sent when category is disabled
-3. Log is NOT sent when target is blacklisted
-4. Log IS sent when target is whitelisted
-5. Embed contains correct information
+
+### Database Service Tests
+- GuildConfigService: get, set, enable, disable, reset
+- FilterService: add, remove, shouldLog (whitelist/blacklist)
+- ErrorLogService: log, getRecent, getByGuild, markResolved, getStats
+
+### Utility Tests
+- Embed creation and formatting
+- Formatters (user, channel, timestamp)
+- Diffing (object comparison)
 
 ## Writing New Tests
 
-Use the mock helpers:
+Use the DRY test helpers:
 
 ```typescript
-import { createMockClient, addMockChannel } from '../mocks/client';
-import { createMockTextChannel } from '../mocks/channel';
-import { GuildConfigService } from '../../src/database/services';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { TEST_IDS, createTestContext, disableCategory } from '../../helpers/testUtils';
+import { GuildConfigService } from '../../../src/database';
+import { event } from '../../../src/events/handlers/category/eventName';
 
-describe('myEvent', () => {
+describe('eventName', () => {
   beforeEach(async () => {
-    await GuildConfigService.set(guildId, 'category', logChannelId);
+    await GuildConfigService.set(TEST_IDS.GUILD, 'category', TEST_IDS.LOG_CHANNEL);
   });
 
-  it('should send log', async () => {
-    const client = createMockClient();
-    const logChannel = createMockTextChannel({ id: logChannelId, guildId });
-    addMockChannel(client, logChannel);
-
-    await event.execute(client, ...args);
-
+  it('sends log when event fires', async () => {
+    const { client, logChannel } = createTestContext();
+    
+    await event.execute(client, mockData);
+    
     expect(logChannel.send).toHaveBeenCalled();
+  });
+
+  it('does not send log when disabled', async () => {
+    await disableCategory('category');
+    const { client, logChannel } = createTestContext();
+    
+    await event.execute(client, mockData);
+    
+    expect(logChannel.send).not.toHaveBeenCalled();
   });
 });
 ```
