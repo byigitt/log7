@@ -1,5 +1,7 @@
 export * from './logger';
 export * from './embed';
+export * from './embeds';
+export * from './fields';
 export * from './attachment';
 export * from './formatters';
 export * from './diffing';
