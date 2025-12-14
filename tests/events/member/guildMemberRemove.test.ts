@@ -1,13 +1,13 @@
 import { describe, it, beforeEach } from 'vitest';
-import { event } from '../../../src/events/handlers/member/guildMemberAdd';
+import { event } from '../../../src/events/handlers/member/guildMemberRemove';
 import { createTestContext, disableCategory, blacklistUser, expectLogSent, expectLogNotSent, TestContext, TEST_IDS } from '../../helpers/testUtils';
 import { createMockMember } from '../../mocks/member';
 
-describe('guildMemberAdd', () => {
+describe('guildMemberRemove', () => {
   let ctx: TestContext;
   beforeEach(async () => { ctx = await createTestContext('member'); });
 
-  it('sends log when member joins', async () => {
+  it('sends log when member leaves', async () => {
     await event.execute(ctx.client, createMockMember({ guildId: TEST_IDS.GUILD }));
     expectLogSent(ctx);
   });

@@ -1,106 +1,41 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, beforeEach } from 'vitest';
 import { event } from '../../../src/events/handlers/voice/voiceStateUpdate';
-import { GuildConfigService, FilterService } from '../../../src/database/services';
-import { createMockClient, addMockChannel } from '../../mocks/client';
-import { createMockTextChannel } from '../../mocks/channel';
+import { createTestContext, disableCategory, blacklistUser, expectLogSent, expectLogNotSent, TestContext, TEST_IDS } from '../../helpers/testUtils';
 import { createMockGuild } from '../../mocks/guild';
 import { createMockMember } from '../../mocks/member';
-import { VoiceState, VoiceChannel } from 'discord.js';
+import { VoiceState } from 'discord.js';
 
-function createMockVoiceState(options: {
-  guildId?: string;
-  memberId?: string;
-  channelId?: string | null;
-  selfMute?: boolean;
-  selfDeaf?: boolean;
-} = {}): VoiceState {
-  const { 
-    guildId = '999999999999999999', 
-    memberId = '222222222222222222',
-    channelId = '111111111111111111',
-    selfMute = false,
-    selfDeaf = false,
-  } = options;
+const createVoiceState = (channelId: string | null, opts: { odId?: string } = {}): VoiceState => ({
+  guild: createMockGuild({ id: TEST_IDS.GUILD }),
+  member: createMockMember({ id: opts.odId ?? TEST_IDS.USER, guildId: TEST_IDS.GUILD }),
+  channelId,
+  channel: channelId ? { id: channelId, name: 'VC', toString: () => `<#${channelId}>` } : null,
+  selfMute: false, selfDeaf: false, serverMute: false, serverDeaf: false,
+} as unknown as VoiceState);
 
-  const guild = createMockGuild({ id: guildId });
-  const member = createMockMember({ id: memberId, guildId });
+describe('voiceStateUpdate', () => {
+  let ctx: TestContext;
+  beforeEach(async () => { ctx = await createTestContext('voice'); });
 
-  return {
-    guild,
-    member,
-    channelId,
-    channel: channelId ? { id: channelId, name: 'Voice Channel', toString: () => `<#${channelId}>` } : null,
-    selfMute,
-    selfDeaf,
-    serverMute: false,
-    serverDeaf: false,
-    streaming: false,
-    selfVideo: false,
-  } as unknown as VoiceState;
-}
-
-describe('voiceStateUpdate event', () => {
-  const guildId = '999999999999999999';
-  const logChannelId = '888888888888888888';
-
-  beforeEach(async () => {
-    await GuildConfigService.set(guildId, 'voice', logChannelId);
+  it('sends log when user joins voice', async () => {
+    await event.execute(ctx.client, createVoiceState(null), createVoiceState(TEST_IDS.CHANNEL));
+    expectLogSent(ctx);
   });
 
-  it('should send log when user joins voice channel', async () => {
-    const client = createMockClient();
-    const logChannel = createMockTextChannel({ id: logChannelId, guildId });
-    addMockChannel(client, logChannel);
-
-    const oldState = createMockVoiceState({ guildId, channelId: null });
-    const newState = createMockVoiceState({ guildId, channelId: '111111111111111111' });
-
-    await event.execute(client, oldState, newState);
-
-    expect(logChannel.send).toHaveBeenCalled();
+  it('sends log when user leaves voice', async () => {
+    await event.execute(ctx.client, createVoiceState(TEST_IDS.CHANNEL), createVoiceState(null));
+    expectLogSent(ctx);
   });
 
-  it('should send log when user leaves voice channel', async () => {
-    const client = createMockClient();
-    const logChannel = createMockTextChannel({ id: logChannelId, guildId });
-    addMockChannel(client, logChannel);
-
-    const oldState = createMockVoiceState({ guildId, channelId: '111111111111111111' });
-    const newState = createMockVoiceState({ guildId, channelId: null });
-
-    await event.execute(client, oldState, newState);
-
-    expect(logChannel.send).toHaveBeenCalled();
+  it('skips when disabled', async () => {
+    await disableCategory('voice');
+    await event.execute(ctx.client, createVoiceState(null), createVoiceState(TEST_IDS.CHANNEL));
+    expectLogNotSent(ctx);
   });
 
-  it('should not send log when category is disabled', async () => {
-    await GuildConfigService.disable(guildId, 'voice');
-
-    const client = createMockClient();
-    const logChannel = createMockTextChannel({ id: logChannelId, guildId });
-    addMockChannel(client, logChannel);
-
-    const oldState = createMockVoiceState({ guildId, channelId: null });
-    const newState = createMockVoiceState({ guildId, channelId: '111111111111111111' });
-
-    await event.execute(client, oldState, newState);
-
-    expect(logChannel.send).not.toHaveBeenCalled();
-  });
-
-  it('should not send log when user is blacklisted', async () => {
-    const userId = '222222222222222222';
-    await FilterService.add(guildId, 'blacklist', 'user', userId, 'voice');
-
-    const client = createMockClient();
-    const logChannel = createMockTextChannel({ id: logChannelId, guildId });
-    addMockChannel(client, logChannel);
-
-    const oldState = createMockVoiceState({ guildId, memberId: userId, channelId: null });
-    const newState = createMockVoiceState({ guildId, memberId: userId, channelId: '111111111111111111' });
-
-    await event.execute(client, oldState, newState);
-
-    expect(logChannel.send).not.toHaveBeenCalled();
+  it('skips when user blacklisted', async () => {
+    await blacklistUser('voice');
+    await event.execute(ctx.client, createVoiceState(null, { odId: TEST_IDS.USER }), createVoiceState(TEST_IDS.CHANNEL, { odId: TEST_IDS.USER }));
+    expectLogNotSent(ctx);
   });
 });

@@ -1,61 +1,26 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, beforeEach } from 'vitest';
 import { event } from '../../../src/events/handlers/channel/channelCreate';
-import { GuildConfigService, FilterService } from '../../../src/database/services';
-import { createMockClient, addMockChannel } from '../../mocks/client';
-import { createMockTextChannel, createMockGuildChannel } from '../../mocks/channel';
-import { ChannelType } from 'discord.js';
+import { createTestContext, disableCategory, blacklistChannel, expectLogSent, expectLogNotSent, TestContext, TEST_IDS } from '../../helpers/testUtils';
+import { createMockGuildChannel } from '../../mocks/channel';
 
-describe('channelCreate event', () => {
-  const guildId = '999999999999999999';
-  const logChannelId = '888888888888888888';
+describe('channelCreate', () => {
+  let ctx: TestContext;
+  beforeEach(async () => { ctx = await createTestContext('channel'); });
 
-  beforeEach(async () => {
-    await GuildConfigService.set(guildId, 'channel', logChannelId);
+  it('sends log when channel created', async () => {
+    await event.execute(ctx.client, createMockGuildChannel({ guildId: TEST_IDS.GUILD }) as any);
+    expectLogSent(ctx);
   });
 
-  it('should send log when channel is created', async () => {
-    const client = createMockClient();
-    const logChannel = createMockTextChannel({ id: logChannelId, guildId });
-    addMockChannel(client, logChannel);
-
-    const newChannel = createMockGuildChannel({ 
-      id: '111111111111111111', 
-      name: 'new-channel',
-      guildId,
-      type: ChannelType.GuildText 
-    });
-
-    await event.execute(client, newChannel as any);
-
-    expect(logChannel.send).toHaveBeenCalled();
+  it('skips when disabled', async () => {
+    await disableCategory('channel');
+    await event.execute(ctx.client, createMockGuildChannel({ guildId: TEST_IDS.GUILD }) as any);
+    expectLogNotSent(ctx);
   });
 
-  it('should not send log when category is disabled', async () => {
-    await GuildConfigService.disable(guildId, 'channel');
-
-    const client = createMockClient();
-    const logChannel = createMockTextChannel({ id: logChannelId, guildId });
-    addMockChannel(client, logChannel);
-
-    const newChannel = createMockGuildChannel({ guildId });
-
-    await event.execute(client, newChannel as any);
-
-    expect(logChannel.send).not.toHaveBeenCalled();
-  });
-
-  it('should not send log when channel is blacklisted', async () => {
-    const channelId = '111111111111111111';
-    await FilterService.add(guildId, 'blacklist', 'channel', channelId, 'channel');
-
-    const client = createMockClient();
-    const logChannel = createMockTextChannel({ id: logChannelId, guildId });
-    addMockChannel(client, logChannel);
-
-    const newChannel = createMockGuildChannel({ id: channelId, guildId });
-
-    await event.execute(client, newChannel as any);
-
-    expect(logChannel.send).not.toHaveBeenCalled();
+  it('skips when channel blacklisted', async () => {
+    await blacklistChannel('channel');
+    await event.execute(ctx.client, createMockGuildChannel({ id: TEST_IDS.CHANNEL, guildId: TEST_IDS.GUILD }) as any);
+    expectLogNotSent(ctx);
   });
 });
