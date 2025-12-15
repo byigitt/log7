@@ -9,7 +9,7 @@ export interface HandlerConfig<T> {
   getGuild: (data: T) => Guild | { id: string } | null;
   getFilterParams?: (data: T) => FilterCheckParams;
   createEmbed: (data: T) => EmbedBuilder;
-  getAttachments?: (data: T) => AttachmentBuilder[] | undefined;
+  getAttachments?: (data: T) => Promise<AttachmentBuilder[] | undefined> | AttachmentBuilder[] | undefined;
   skip?: (data: T) => boolean;
 }
 
@@ -28,6 +28,7 @@ export interface DualArgHandlerConfig<T, U> {
   getGuild: (arg1: T, arg2: U) => Guild | { id: string } | null;
   getFilterParams?: (arg1: T, arg2: U) => FilterCheckParams;
   createEmbed: (arg1: T, arg2: U) => EmbedBuilder | null;
+  getAttachments?: (arg1: T, arg2: U) => Promise<AttachmentBuilder[] | undefined> | AttachmentBuilder[] | undefined;
   skip?: (arg1: T, arg2: U) => boolean;
 }
 
@@ -65,7 +66,7 @@ export function createHandler<T>(config: HandlerConfig<T>) {
         if (!await shouldLog(guildId, config.category, filterParams)) return;
 
         const embed = config.createEmbed(data);
-        const attachments = config.getAttachments?.(data);
+        const attachments = await config.getAttachments?.(data);
         await sendLog(logChannel, embed, attachments);
       } catch (error) {
         await logger.logError(error instanceof Error ? error : new Error(String(error)), {
@@ -144,7 +145,8 @@ export function createDualArgHandler<T, U>(config: DualArgHandlerConfig<T, U>) {
         const embed = config.createEmbed(arg1, arg2);
         if (!embed) return;
         
-        await sendLog(logChannel, embed);
+        const attachments = await config.getAttachments?.(arg1, arg2);
+        await sendLog(logChannel, embed, attachments);
       } catch (error) {
         await logger.logError(error instanceof Error ? error : new Error(String(error)), {
           type: 'event',

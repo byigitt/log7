@@ -1,6 +1,6 @@
 import { Message, PartialMessage } from 'discord.js';
 import { createHandler } from '../../createHandler';
-import { Embeds, field, userField, channelField } from '../../../utils';
+import { Embeds, field, userField, channelField, preserveAttachments } from '../../../utils';
 
 export const event = createHandler<Message | PartialMessage>({
   name: 'messageDelete',
@@ -16,6 +16,10 @@ export const event = createHandler<Message | PartialMessage>({
       m.attachments.size > 0 ? field('Attachments', m.attachments.map(a => a.name).join(', '), false) : null,
     ],
   }),
+  getAttachments: async (m) => {
+    if (m.attachments.size === 0) return undefined;
+    return await preserveAttachments(m.attachments);
+  },
 });
 
 export default event;
