@@ -1,5 +1,5 @@
 import { Filter } from '../models';
-import { EventCategory, IFilter, FilterCheckParams } from '../../types';
+import { EventCategory, IFilter, FilterCheckParams } from '@log7/shared';
 
 export const FilterService = {
   async add(

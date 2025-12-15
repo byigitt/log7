@@ -1,4 +1,5 @@
 import { ClientEvents, Client, Collection } from 'discord.js';
+import { EventCategory } from '@log7/shared';
 
 export interface EventHandler<K extends keyof ClientEvents = keyof ClientEvents> {
   name: K;
@@ -6,26 +7,7 @@ export interface EventHandler<K extends keyof ClientEvents = keyof ClientEvents>
   execute: (client: Client<true>, ...args: ClientEvents[K]) => Promise<void>;
 }
 
-export type EventCategory =
-  | 'channel'
-  | 'guild'
-  | 'member'
-  | 'message'
-  | 'reaction'
-  | 'role'
-  | 'voice'
-  | 'thread'
-  | 'emoji'
-  | 'sticker'
-  | 'invite'
-  | 'scheduled'
-  | 'stage'
-  | 'ban'
-  | 'automod'
-  | 'interaction'
-  | 'presence'
-  | 'user'
-  | 'webhook';
+export { EventCategory };
 
 export const EVENT_TO_CATEGORY: Record<string, EventCategory> = {
   // Channel events

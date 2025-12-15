@@ -109,6 +109,10 @@ importers:
         version: 5.9.3
 
   packages/shared:
+    dependencies:
+      mongoose:
+        specifier: ^8.8.3
+        version: 8.20.2
     devDependencies:
       rimraf:
         specifier: ^6.0.1

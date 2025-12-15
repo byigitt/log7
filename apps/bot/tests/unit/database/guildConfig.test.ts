@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { GuildConfigService } from '../../../src/database/services';
+import { GuildConfigService } from '@log7/database';
 
 describe('GuildConfigService', () => {
   const guildId = '999999999999999999';

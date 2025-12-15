@@ -1,7 +1,7 @@
 import { vi } from 'vitest';
 import { Client, TextChannel, EmbedBuilder, Role, GuildEmoji, Invite, ThreadChannel, ChannelType, GuildBan, Sticker, StickerFormatType, GuildScheduledEvent, GuildScheduledEventStatus, GuildScheduledEventEntityType, StageInstance, StageInstancePrivacyLevel, AutoModerationRule, AutoModerationRuleTriggerType, AutoModerationRuleEventType, AutoModerationActionType } from 'discord.js';
-import { GuildConfigService, FilterService } from '../../src/database/services';
-import { EventCategory } from '../../src/types';
+import { GuildConfigService, FilterService } from '@log7/database';
+import { EventCategory } from '@log7/shared';
 import { createMockClient, addMockChannel } from '../mocks/client';
 import { createMockTextChannel } from '../mocks/channel';
 import { createMockGuild } from '../mocks/guild';

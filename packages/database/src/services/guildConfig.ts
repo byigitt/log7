@@ -1,5 +1,5 @@
 import { GuildConfig } from '../models';
-import { EventCategory, IGuildConfig } from '../../types';
+import { EventCategory, IGuildConfig } from '@log7/shared';
 
 export const GuildConfigService = {
   async get(guildId: string, category: EventCategory): Promise<IGuildConfig | null> {

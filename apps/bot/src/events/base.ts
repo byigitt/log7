@@ -1,7 +1,6 @@
 import { Client, TextChannel, EmbedBuilder, AttachmentBuilder, ChannelType } from 'discord.js';
-import { EventCategory } from '../types';
-import { GuildConfigService, FilterService } from '../database/services';
-import { FilterCheckParams } from '../types';
+import { EventCategory, FilterCheckParams } from '@log7/shared';
+import { GuildConfigService, FilterService } from '@log7/database';
 
 export async function getLogChannel(
   client: Client<true>,

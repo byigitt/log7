@@ -1,30 +1,5 @@
-import { Schema, model, Document } from 'mongoose';
-
-export type ErrorLevel = 'error' | 'warn' | 'fatal';
-export type ErrorType = 'event' | 'command' | 'database' | 'system';
-
-export interface IErrorContext {
-  guildId?: string;
-  guildName?: string;
-  userId?: string;
-  userName?: string;
-  channelId?: string;
-  channelName?: string;
-  extra?: Record<string, unknown>;
-}
-
-export interface IErrorLog extends Document {
-  timestamp: Date;
-  level: ErrorLevel;
-  type: ErrorType;
-  source: string;
-  message: string;
-  stack?: string;
-  context: IErrorContext;
-  resolved: boolean;
-  resolvedAt?: Date;
-  resolvedBy?: string;
-}
+import { Schema, model } from 'mongoose';
+import { IErrorLog } from '@log7/shared';
 
 const ErrorLogSchema = new Schema<IErrorLog>({
   timestamp: { type: Date, default: Date.now, index: true },

@@ -1,4 +1,5 @@
-import { ErrorLog, IErrorLog, IErrorContext, ErrorLevel, ErrorType } from '../models/ErrorLog';
+import { ErrorLog } from '../models/ErrorLog';
+import { IErrorLog, IErrorContext, ErrorLevel, ErrorType } from '@log7/shared';
 
 export interface LogErrorParams {
   level?: ErrorLevel;

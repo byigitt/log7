@@ -1,6 +1,6 @@
 import { config, validateConfig } from './config/config';
 import { LogClient } from './client';
-import { connectDatabase } from './database';
+import { connectDatabase } from '@log7/database';
 import { loadEvents } from './events';
 import { loadCommands } from './commands';
 import { logger } from './utils';

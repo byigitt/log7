@@ -1,5 +1,5 @@
-import { ErrorLogService, LogErrorParams } from '../database/services/errorLog';
-import { IErrorContext, ErrorType } from '../database/models/ErrorLog';
+import { ErrorLogService } from '@log7/database';
+import { IErrorContext, ErrorType } from '@log7/shared';
 
 const colors = {
   reset: '\x1b[0m',

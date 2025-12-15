@@ -4,9 +4,10 @@ import {
   PermissionFlagsBits,
   ChannelType,
 } from 'discord.js';
-import { Command, EventCategory } from '../../types';
+import { EventCategory } from '@log7/shared';
+import { GuildConfigService, FilterService } from '@log7/database';
+import { Command } from '../../types';
 import { ALL_CATEGORIES } from '../../constants';
-import { GuildConfigService, FilterService } from '../../database/services';
 import { logger } from '../../utils';
 
 const categoryChoices = ALL_CATEGORIES.map((c) => ({ name: c, value: c }));

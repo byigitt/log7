@@ -1,5 +1,5 @@
 import { Schema, model } from 'mongoose';
-import { IFilterDocument } from '../../types';
+import { IFilterDocument } from '@log7/shared';
 
 const FilterSchema = new Schema<IFilterDocument>(
   {

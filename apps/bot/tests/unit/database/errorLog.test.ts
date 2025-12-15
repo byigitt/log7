@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { ErrorLog } from '../../../src/database/models/ErrorLog';
-import { ErrorLogService } from '../../../src/database/services/errorLog';
+import { ErrorLog, ErrorLogService } from '@log7/database';
 
 describe('ErrorLogService', () => {
   beforeEach(async () => {

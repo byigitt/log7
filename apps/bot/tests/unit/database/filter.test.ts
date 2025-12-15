@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { FilterService } from '../../../src/database/services';
+import { FilterService } from '@log7/database';
 
 describe('FilterService', () => {
   const guildId = '999999999999999999';

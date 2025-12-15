@@ -1,5 +1,5 @@
 import { Schema, model } from 'mongoose';
-import { IGuildConfigDocument } from '../../types';
+import { IGuildConfigDocument } from '@log7/shared';
 
 const GuildConfigSchema = new Schema<IGuildConfigDocument>(
   {
