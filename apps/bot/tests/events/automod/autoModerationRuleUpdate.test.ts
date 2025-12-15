@@ -8,12 +8,12 @@ describe('autoModerationRuleUpdate', () => {
 
   it('sends log when rule updated', async () => {
     await event.execute(ctx.client, createMockAutoModRule({ name: 'old' }), createMockAutoModRule({ name: 'new' }));
-    expectLogSent(ctx);
+    await expectLogSent(ctx);
   });
 
   it('skips when disabled', async () => {
     await disableCategory('automod');
     await event.execute(ctx.client, createMockAutoModRule(), createMockAutoModRule());
-    expectLogNotSent(ctx);
+    await expectLogNotSent(ctx);
   });
 });

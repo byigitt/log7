@@ -11,13 +11,13 @@ describe('channelUpdate', () => {
     const old = createMockGuildChannel({ guildId: TEST_IDS.GUILD, name: 'old' });
     const updated = createMockGuildChannel({ guildId: TEST_IDS.GUILD, name: 'new' });
     await event.execute(ctx.client, old as any, updated as any);
-    expectLogSent(ctx);
+    await expectLogSent(ctx);
   });
 
   it('skips when disabled', async () => {
     await disableCategory('channel');
     const ch = createMockGuildChannel({ guildId: TEST_IDS.GUILD });
     await event.execute(ctx.client, ch as any, ch as any);
-    expectLogNotSent(ctx);
+    await expectLogNotSent(ctx);
   });
 });

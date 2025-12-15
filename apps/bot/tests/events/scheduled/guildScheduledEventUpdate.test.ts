@@ -8,12 +8,12 @@ describe('guildScheduledEventUpdate', () => {
 
   it('sends log when event updated', async () => {
     await event.execute(ctx.client, createMockScheduledEvent({ name: 'old' }), createMockScheduledEvent({ name: 'new' }));
-    expectLogSent(ctx);
+    await expectLogSent(ctx);
   });
 
   it('skips when disabled', async () => {
     await disableCategory('scheduled');
     await event.execute(ctx.client, createMockScheduledEvent(), createMockScheduledEvent());
-    expectLogNotSent(ctx);
+    await expectLogNotSent(ctx);
   });
 });

@@ -1,6 +1,7 @@
 import { Client, TextChannel, EmbedBuilder, AttachmentBuilder, ChannelType } from 'discord.js';
 import { EventCategory, FilterCheckParams } from '@log7/shared';
 import { GuildService } from '@log7/database';
+import { logQueue } from '../utils';
 
 export async function getLogChannel(
   client: Client<true>,
@@ -30,17 +31,22 @@ export async function shouldLog(
   return GuildService.shouldLog(guildId, category, params);
 }
 
-export async function sendLog(
+export interface SendLogOptions {
+  guildId?: string;
+  eventName?: string;
+}
+
+export function sendLog(
   channel: TextChannel,
   embed: EmbedBuilder,
-  attachments?: AttachmentBuilder[]
-): Promise<void> {
-  try {
-    await channel.send({
-      embeds: [embed],
-      files: attachments,
-    });
-  } catch (error) {
-    console.error('[Event] Failed to send log:', error);
-  }
+  attachments?: AttachmentBuilder[],
+  options?: SendLogOptions
+): void {
+  logQueue.add({
+    channel,
+    embed,
+    attachments,
+    guildId: options?.guildId,
+    eventName: options?.eventName,
+  });
 }

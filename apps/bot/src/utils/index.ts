@@ -5,3 +5,5 @@ export * from './fields';
 export * from './attachment';
 export * from './formatters';
 export * from './diffing';
+export * from './metrics';
+export * from './logQueue';

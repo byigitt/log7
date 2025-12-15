@@ -8,18 +8,18 @@ describe('guildBanRemove', () => {
 
   it('sends log when user unbanned', async () => {
     await event.execute(ctx.client, createMockBan());
-    expectLogSent(ctx);
+    await expectLogSent(ctx);
   });
 
   it('skips when disabled', async () => {
     await disableCategory('ban');
     await event.execute(ctx.client, createMockBan());
-    expectLogNotSent(ctx);
+    await expectLogNotSent(ctx);
   });
 
   it('skips when user blacklisted', async () => {
     await blacklistUser('ban');
     await event.execute(ctx.client, createMockBan({ userId: TEST_IDS.USER }));
-    expectLogNotSent(ctx);
+    await expectLogNotSent(ctx);
   });
 });

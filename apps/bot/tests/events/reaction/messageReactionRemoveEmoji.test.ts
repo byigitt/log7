@@ -16,12 +16,12 @@ describe('messageReactionRemoveEmoji', () => {
 
   it('sends log when emoji reactions removed', async () => {
     await event.execute(ctx.client, createReaction());
-    expectLogSent(ctx);
+    await expectLogSent(ctx);
   });
 
   it('skips when disabled', async () => {
     await disableCategory('reaction');
     await event.execute(ctx.client, createReaction());
-    expectLogNotSent(ctx);
+    await expectLogNotSent(ctx);
   });
 });

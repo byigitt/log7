@@ -10,12 +10,12 @@ describe('messageReactionRemoveAll', () => {
 
   it('sends log when all reactions removed', async () => {
     await event.execute(ctx.client, createMockMessage({ guildId: TEST_IDS.GUILD }), new Collection<string, MessageReaction>());
-    expectLogSent(ctx);
+    await expectLogSent(ctx);
   });
 
   it('skips when disabled', async () => {
     await disableCategory('reaction');
     await event.execute(ctx.client, createMockMessage({ guildId: TEST_IDS.GUILD }), new Collection<string, MessageReaction>());
-    expectLogNotSent(ctx);
+    await expectLogNotSent(ctx);
   });
 });

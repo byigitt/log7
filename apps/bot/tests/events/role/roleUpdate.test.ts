@@ -8,12 +8,12 @@ describe('roleUpdate', () => {
 
   it('sends log when role updated', async () => {
     await event.execute(ctx.client, createMockRole({ name: 'old' }), createMockRole({ name: 'new' }));
-    expectLogSent(ctx);
+    await expectLogSent(ctx);
   });
 
   it('skips when disabled', async () => {
     await disableCategory('role');
     await event.execute(ctx.client, createMockRole(), createMockRole());
-    expectLogNotSent(ctx);
+    await expectLogNotSent(ctx);
   });
 });

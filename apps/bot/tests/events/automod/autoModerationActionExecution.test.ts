@@ -21,18 +21,18 @@ describe('autoModerationActionExecution', () => {
 
   it('sends log when action executed', async () => {
     await event.execute(ctx.client, createExecution());
-    expectLogSent(ctx);
+    await expectLogSent(ctx);
   });
 
   it('skips when disabled', async () => {
     await disableCategory('automod');
     await event.execute(ctx.client, createExecution());
-    expectLogNotSent(ctx);
+    await expectLogNotSent(ctx);
   });
 
   it('skips when user blacklisted', async () => {
     await blacklistUser('automod');
     await event.execute(ctx.client, createExecution(TEST_IDS.USER));
-    expectLogNotSent(ctx);
+    await expectLogNotSent(ctx);
   });
 });

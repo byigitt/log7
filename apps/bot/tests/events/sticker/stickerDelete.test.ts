@@ -8,12 +8,12 @@ describe('stickerDelete', () => {
 
   it('sends log when sticker deleted', async () => {
     await event.execute(ctx.client, createMockSticker());
-    expectLogSent(ctx);
+    await expectLogSent(ctx);
   });
 
   it('skips when disabled', async () => {
     await disableCategory('sticker');
     await event.execute(ctx.client, createMockSticker());
-    expectLogNotSent(ctx);
+    await expectLogNotSent(ctx);
   });
 });

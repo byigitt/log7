@@ -19,23 +19,23 @@ describe('voiceStateUpdate', () => {
 
   it('sends log when user joins voice', async () => {
     await event.execute(ctx.client, createVoiceState(null), createVoiceState(TEST_IDS.CHANNEL));
-    expectLogSent(ctx);
+    await expectLogSent(ctx);
   });
 
   it('sends log when user leaves voice', async () => {
     await event.execute(ctx.client, createVoiceState(TEST_IDS.CHANNEL), createVoiceState(null));
-    expectLogSent(ctx);
+    await expectLogSent(ctx);
   });
 
   it('skips when disabled', async () => {
     await disableCategory('voice');
     await event.execute(ctx.client, createVoiceState(null), createVoiceState(TEST_IDS.CHANNEL));
-    expectLogNotSent(ctx);
+    await expectLogNotSent(ctx);
   });
 
   it('skips when user blacklisted', async () => {
     await blacklistUser('voice');
     await event.execute(ctx.client, createVoiceState(null, { odId: TEST_IDS.USER }), createVoiceState(TEST_IDS.CHANNEL, { odId: TEST_IDS.USER }));
-    expectLogNotSent(ctx);
+    await expectLogNotSent(ctx);
   });
 });

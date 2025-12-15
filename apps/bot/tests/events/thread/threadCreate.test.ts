@@ -8,17 +8,17 @@ describe('threadCreate', () => {
 
   it('sends log when thread created (newlyCreated=true)', async () => {
     await event.execute(ctx.client, createMockThread(), true);
-    expectLogSent(ctx);
+    await expectLogSent(ctx);
   });
 
   it('skips when not newly created', async () => {
     await event.execute(ctx.client, createMockThread(), false);
-    expectLogNotSent(ctx);
+    await expectLogNotSent(ctx);
   });
 
   it('skips when disabled', async () => {
     await disableCategory('thread');
     await event.execute(ctx.client, createMockThread(), true);
-    expectLogNotSent(ctx);
+    await expectLogNotSent(ctx);
   });
 });

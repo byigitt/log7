@@ -9,12 +9,12 @@ describe('guildIntegrationsUpdate', () => {
 
   it('sends log when integrations updated', async () => {
     await event.execute(ctx.client, createMockGuild({ id: TEST_IDS.GUILD }));
-    expectLogSent(ctx);
+    await expectLogSent(ctx);
   });
 
   it('skips when disabled', async () => {
     await disableCategory('guild');
     await event.execute(ctx.client, createMockGuild({ id: TEST_IDS.GUILD }));
-    expectLogNotSent(ctx);
+    await expectLogNotSent(ctx);
   });
 });

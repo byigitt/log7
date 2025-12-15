@@ -67,7 +67,7 @@ export function createHandler<T>(config: HandlerConfig<T>) {
 
         const embed = config.createEmbed(data);
         const attachments = await config.getAttachments?.(data);
-        await sendLog(logChannel, embed, attachments);
+        sendLog(logChannel, embed, attachments, { guildId, eventName: config.name });
       } catch (error) {
         await logger.logError(error instanceof Error ? error : new Error(String(error)), {
           type: 'event',
@@ -106,7 +106,7 @@ export function createUpdateHandler<T>(config: UpdateHandlerConfig<T>) {
         const embed = config.createEmbed(oldData, newData);
         if (!embed) return;
         
-        await sendLog(logChannel, embed);
+        sendLog(logChannel, embed, undefined, { guildId, eventName: config.name });
       } catch (error) {
         await logger.logError(error instanceof Error ? error : new Error(String(error)), {
           type: 'event',
@@ -146,7 +146,7 @@ export function createDualArgHandler<T, U>(config: DualArgHandlerConfig<T, U>) {
         if (!embed) return;
         
         const attachments = await config.getAttachments?.(arg1, arg2);
-        await sendLog(logChannel, embed, attachments);
+        sendLog(logChannel, embed, attachments, { guildId, eventName: config.name });
       } catch (error) {
         await logger.logError(error instanceof Error ? error : new Error(String(error)), {
           type: 'event',

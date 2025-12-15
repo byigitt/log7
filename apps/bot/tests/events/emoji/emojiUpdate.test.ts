@@ -8,12 +8,12 @@ describe('emojiUpdate', () => {
 
   it('sends log when emoji updated', async () => {
     await event.execute(ctx.client, createMockEmoji({ name: 'old' }), createMockEmoji({ name: 'new' }));
-    expectLogSent(ctx);
+    await expectLogSent(ctx);
   });
 
   it('skips when disabled', async () => {
     await disableCategory('emoji');
     await event.execute(ctx.client, createMockEmoji(), createMockEmoji());
-    expectLogNotSent(ctx);
+    await expectLogNotSent(ctx);
   });
 });

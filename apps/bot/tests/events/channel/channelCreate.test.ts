@@ -9,18 +9,18 @@ describe('channelCreate', () => {
 
   it('sends log when channel created', async () => {
     await event.execute(ctx.client, createMockGuildChannel({ guildId: TEST_IDS.GUILD }) as any);
-    expectLogSent(ctx);
+    await expectLogSent(ctx);
   });
 
   it('skips when disabled', async () => {
     await disableCategory('channel');
     await event.execute(ctx.client, createMockGuildChannel({ guildId: TEST_IDS.GUILD }) as any);
-    expectLogNotSent(ctx);
+    await expectLogNotSent(ctx);
   });
 
   it('skips when channel blacklisted', async () => {
     await blacklistChannel('channel');
     await event.execute(ctx.client, createMockGuildChannel({ id: TEST_IDS.CHANNEL, guildId: TEST_IDS.GUILD }) as any);
-    expectLogNotSent(ctx);
+    await expectLogNotSent(ctx);
   });
 });

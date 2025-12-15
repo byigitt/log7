@@ -9,13 +9,13 @@ describe('guildUpdate', () => {
 
   it('sends log when guild updated', async () => {
     await event.execute(ctx.client, createMockGuild({ id: TEST_IDS.GUILD, name: 'old' }), createMockGuild({ id: TEST_IDS.GUILD, name: 'new' }));
-    expectLogSent(ctx);
+    await expectLogSent(ctx);
   });
 
   it('skips when disabled', async () => {
     await disableCategory('guild');
     const g = createMockGuild({ id: TEST_IDS.GUILD });
     await event.execute(ctx.client, g, g);
-    expectLogNotSent(ctx);
+    await expectLogNotSent(ctx);
   });
 });

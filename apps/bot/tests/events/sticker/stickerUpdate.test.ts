@@ -8,12 +8,12 @@ describe('stickerUpdate', () => {
 
   it('sends log when sticker updated', async () => {
     await event.execute(ctx.client, createMockSticker({ name: 'old' }), createMockSticker({ name: 'new' }));
-    expectLogSent(ctx);
+    await expectLogSent(ctx);
   });
 
   it('skips when disabled', async () => {
     await disableCategory('sticker');
     await event.execute(ctx.client, createMockSticker(), createMockSticker());
-    expectLogNotSent(ctx);
+    await expectLogNotSent(ctx);
   });
 });

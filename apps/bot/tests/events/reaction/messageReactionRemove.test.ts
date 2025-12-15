@@ -17,18 +17,18 @@ describe('messageReactionRemove', () => {
 
   it('sends log when reaction removed', async () => {
     await event.execute(ctx.client, createReaction(), createMockUser({ id: TEST_IDS.USER }));
-    expectLogSent(ctx);
+    await expectLogSent(ctx);
   });
 
   it('skips when disabled', async () => {
     await disableCategory('reaction');
     await event.execute(ctx.client, createReaction(), createMockUser({ id: TEST_IDS.USER }));
-    expectLogNotSent(ctx);
+    await expectLogNotSent(ctx);
   });
 
   it('skips when user blacklisted', async () => {
     await blacklistUser('reaction');
     await event.execute(ctx.client, createReaction(), createMockUser({ id: TEST_IDS.USER }));
-    expectLogNotSent(ctx);
+    await expectLogNotSent(ctx);
   });
 });

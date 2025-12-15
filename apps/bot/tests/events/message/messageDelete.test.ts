@@ -9,29 +9,29 @@ describe('messageDelete', () => {
 
   it('sends log when message deleted', async () => {
     await event.execute(ctx.client, createMockMessage({ guildId: TEST_IDS.GUILD }));
-    expectLogSent(ctx);
+    await expectLogSent(ctx);
   });
 
   it('skips bot messages', async () => {
     await event.execute(ctx.client, createMockMessage({ guildId: TEST_IDS.GUILD, bot: true }));
-    expectLogNotSent(ctx);
+    await expectLogNotSent(ctx);
   });
 
   it('skips when disabled', async () => {
     await disableCategory('message');
     await event.execute(ctx.client, createMockMessage({ guildId: TEST_IDS.GUILD }));
-    expectLogNotSent(ctx);
+    await expectLogNotSent(ctx);
   });
 
   it('skips when user blacklisted', async () => {
     await blacklistUser('message');
     await event.execute(ctx.client, createMockMessage({ guildId: TEST_IDS.GUILD, authorId: TEST_IDS.USER }));
-    expectLogNotSent(ctx);
+    await expectLogNotSent(ctx);
   });
 
   it('skips when channel blacklisted', async () => {
     await blacklistChannel('message');
     await event.execute(ctx.client, createMockMessage({ guildId: TEST_IDS.GUILD, channelId: TEST_IDS.CHANNEL }));
-    expectLogNotSent(ctx);
+    await expectLogNotSent(ctx);
   });
 });

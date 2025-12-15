@@ -8,12 +8,12 @@ describe('threadDelete', () => {
 
   it('sends log when thread deleted', async () => {
     await event.execute(ctx.client, createMockThread());
-    expectLogSent(ctx);
+    await expectLogSent(ctx);
   });
 
   it('skips when disabled', async () => {
     await disableCategory('thread');
     await event.execute(ctx.client, createMockThread());
-    expectLogNotSent(ctx);
+    await expectLogNotSent(ctx);
   });
 });

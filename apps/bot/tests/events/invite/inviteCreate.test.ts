@@ -8,12 +8,12 @@ describe('inviteCreate', () => {
 
   it('sends log when invite created', async () => {
     await event.execute(ctx.client, createMockInvite());
-    expectLogSent(ctx);
+    await expectLogSent(ctx);
   });
 
   it('skips when disabled', async () => {
     await disableCategory('invite');
     await event.execute(ctx.client, createMockInvite());
-    expectLogNotSent(ctx);
+    await expectLogNotSent(ctx);
   });
 });

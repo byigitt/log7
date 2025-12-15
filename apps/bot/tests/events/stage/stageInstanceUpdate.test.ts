@@ -8,12 +8,12 @@ describe('stageInstanceUpdate', () => {
 
   it('sends log when stage updated', async () => {
     await event.execute(ctx.client, createMockStageInstance({ topic: 'old' }), createMockStageInstance({ topic: 'new' }));
-    expectLogSent(ctx);
+    await expectLogSent(ctx);
   });
 
   it('skips when disabled', async () => {
     await disableCategory('stage');
     await event.execute(ctx.client, createMockStageInstance(), createMockStageInstance());
-    expectLogNotSent(ctx);
+    await expectLogNotSent(ctx);
   });
 });

@@ -8,12 +8,12 @@ describe('roleCreate', () => {
 
   it('sends log when role created', async () => {
     await event.execute(ctx.client, createMockRole());
-    expectLogSent(ctx);
+    await expectLogSent(ctx);
   });
 
   it('skips when disabled', async () => {
     await disableCategory('role');
     await event.execute(ctx.client, createMockRole());
-    expectLogNotSent(ctx);
+    await expectLogNotSent(ctx);
   });
 });

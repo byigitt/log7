@@ -11,20 +11,20 @@ describe('guildMemberUpdate', () => {
     const old = createMockMember({ guildId: TEST_IDS.GUILD, nickname: 'old' });
     const updated = createMockMember({ guildId: TEST_IDS.GUILD, nickname: 'new' });
     await event.execute(ctx.client, old, updated);
-    expectLogSent(ctx);
+    await expectLogSent(ctx);
   });
 
   it('skips when disabled', async () => {
     await disableCategory('member');
     const m = createMockMember({ guildId: TEST_IDS.GUILD });
     await event.execute(ctx.client, m, m);
-    expectLogNotSent(ctx);
+    await expectLogNotSent(ctx);
   });
 
   it('skips when user blacklisted', async () => {
     await blacklistUser('member');
     const m = createMockMember({ id: TEST_IDS.USER, guildId: TEST_IDS.GUILD });
     await event.execute(ctx.client, m, m);
-    expectLogNotSent(ctx);
+    await expectLogNotSent(ctx);
   });
 });

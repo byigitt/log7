@@ -8,12 +8,12 @@ describe('emojiDelete', () => {
 
   it('sends log when emoji deleted', async () => {
     await event.execute(ctx.client, createMockEmoji());
-    expectLogSent(ctx);
+    await expectLogSent(ctx);
   });
 
   it('skips when disabled', async () => {
     await disableCategory('emoji');
     await event.execute(ctx.client, createMockEmoji());
-    expectLogNotSent(ctx);
+    await expectLogNotSent(ctx);
   });
 });

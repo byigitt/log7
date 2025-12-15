@@ -14,7 +14,7 @@ describe('messageDeleteBulk', () => {
     msgs.set('1', createMockMessage({ id: '1', guildId: TEST_IDS.GUILD }));
     msgs.set('2', createMockMessage({ id: '2', guildId: TEST_IDS.GUILD }));
     await event.execute(ctx.client, msgs, createMockTextChannel({ guildId: TEST_IDS.GUILD }) as any);
-    expectLogSent(ctx);
+    await expectLogSent(ctx);
   });
 
   it('skips when disabled', async () => {
@@ -22,6 +22,6 @@ describe('messageDeleteBulk', () => {
     const msgs = new Collection<Snowflake, Message>();
     msgs.set('1', createMockMessage({ guildId: TEST_IDS.GUILD }));
     await event.execute(ctx.client, msgs, createMockTextChannel({ guildId: TEST_IDS.GUILD }) as any);
-    expectLogNotSent(ctx);
+    await expectLogNotSent(ctx);
   });
 });

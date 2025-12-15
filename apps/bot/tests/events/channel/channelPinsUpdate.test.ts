@@ -9,12 +9,12 @@ describe('channelPinsUpdate', () => {
 
   it('sends log when pins updated', async () => {
     await event.execute(ctx.client, createMockTextChannel({ guildId: TEST_IDS.GUILD }) as any, new Date());
-    expectLogSent(ctx);
+    await expectLogSent(ctx);
   });
 
   it('skips when disabled', async () => {
     await disableCategory('channel');
     await event.execute(ctx.client, createMockTextChannel({ guildId: TEST_IDS.GUILD }) as any, new Date());
-    expectLogNotSent(ctx);
+    await expectLogNotSent(ctx);
   });
 });

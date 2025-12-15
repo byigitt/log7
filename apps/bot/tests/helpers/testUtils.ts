@@ -2,6 +2,7 @@ import { vi } from 'vitest';
 import { Client, TextChannel, EmbedBuilder, Role, GuildEmoji, Invite, ThreadChannel, ChannelType, GuildBan, Sticker, StickerFormatType, GuildScheduledEvent, GuildScheduledEventStatus, GuildScheduledEventEntityType, StageInstance, StageInstancePrivacyLevel, AutoModerationRule, AutoModerationRuleTriggerType, AutoModerationRuleEventType, AutoModerationActionType } from 'discord.js';
 import { GuildService } from '@log7/database';
 import { EventCategory } from '@log7/shared';
+import { logQueue } from '../../src/utils';
 import { createMockClient, addMockChannel } from '../mocks/client';
 import { createMockTextChannel } from '../mocks/channel';
 import { createMockGuild } from '../mocks/guild';
@@ -50,11 +51,13 @@ export async function blacklistChannel(category: EventCategory | 'all', channelI
 }
 
 // Assertions
-export function expectLogSent(ctx: TestContext): void {
+export async function expectLogSent(ctx: TestContext): Promise<void> {
+  await logQueue.flush();
   expect(ctx.logChannel.send).toHaveBeenCalled();
 }
 
-export function expectLogNotSent(ctx: TestContext): void {
+export async function expectLogNotSent(ctx: TestContext): Promise<void> {
+  await logQueue.flush();
   expect(ctx.logChannel.send).not.toHaveBeenCalled();
 }
 

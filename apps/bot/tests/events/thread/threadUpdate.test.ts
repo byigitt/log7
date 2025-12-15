@@ -8,12 +8,12 @@ describe('threadUpdate', () => {
 
   it('sends log when thread updated', async () => {
     await event.execute(ctx.client, createMockThread({ name: 'old' }), createMockThread({ name: 'new' }));
-    expectLogSent(ctx);
+    await expectLogSent(ctx);
   });
 
   it('skips when disabled', async () => {
     await disableCategory('thread');
     await event.execute(ctx.client, createMockThread(), createMockThread());
-    expectLogNotSent(ctx);
+    await expectLogNotSent(ctx);
   });
 });

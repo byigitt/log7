@@ -9,18 +9,18 @@ describe('guildMemberRemove', () => {
 
   it('sends log when member leaves', async () => {
     await event.execute(ctx.client, createMockMember({ guildId: TEST_IDS.GUILD }));
-    expectLogSent(ctx);
+    await expectLogSent(ctx);
   });
 
   it('skips when disabled', async () => {
     await disableCategory('member');
     await event.execute(ctx.client, createMockMember({ guildId: TEST_IDS.GUILD }));
-    expectLogNotSent(ctx);
+    await expectLogNotSent(ctx);
   });
 
   it('skips when user blacklisted', async () => {
     await blacklistUser('member');
     await event.execute(ctx.client, createMockMember({ id: TEST_IDS.USER, guildId: TEST_IDS.GUILD }));
-    expectLogNotSent(ctx);
+    await expectLogNotSent(ctx);
   });
 });

@@ -9,18 +9,18 @@ describe('webhookUpdate', () => {
 
   it('sends log when webhook updated', async () => {
     await event.execute(ctx.client, createMockTextChannel({ guildId: TEST_IDS.GUILD }) as any);
-    expectLogSent(ctx);
+    await expectLogSent(ctx);
   });
 
   it('skips when disabled', async () => {
     await disableCategory('webhook');
     await event.execute(ctx.client, createMockTextChannel({ guildId: TEST_IDS.GUILD }) as any);
-    expectLogNotSent(ctx);
+    await expectLogNotSent(ctx);
   });
 
   it('skips when channel blacklisted', async () => {
     await blacklistChannel('webhook');
     await event.execute(ctx.client, createMockTextChannel({ id: TEST_IDS.CHANNEL, guildId: TEST_IDS.GUILD }) as any);
-    expectLogNotSent(ctx);
+    await expectLogNotSent(ctx);
   });
 });
