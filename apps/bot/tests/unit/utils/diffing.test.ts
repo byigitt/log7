@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getDiff, formatDiffValue } from '../../../src/utils/diffing';
+import { getDiff, formatDiffValue } from '../../../src/utils';
 
 describe('diffing', () => {
   describe('getDiff', () => {
