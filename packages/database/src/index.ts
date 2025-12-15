@@ -18,8 +18,8 @@ export async function disconnectDatabase(): Promise<void> {
 export { mongoose };
 
 // Models
-export { GuildConfig, Filter, ErrorLog } from './models';
+export { Guild, ErrorLog } from './models';
 
 // Services
-export { GuildConfigService, FilterService, ErrorLogService } from './services';
+export { GuildService, ErrorLogService } from './services';
 export type { LogErrorParams, ErrorLogDoc, ErrorStats } from './services';

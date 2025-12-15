@@ -1,8 +1,8 @@
 // Re-export database types from shared package
 export type {
-  IGuildConfig,
-  IGuildConfigDocument,
-  IFilter,
-  IFilterDocument,
+  IGuild,
+  IGuildDocument,
+  ICategoryConfig,
+  IFilterEntry,
   FilterCheckParams,
 } from '@log7/shared';

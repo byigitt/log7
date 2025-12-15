@@ -1,26 +1,5 @@
 import { Document } from 'mongoose';
 
-export interface Guild {
-  id: string;
-  name: string;
-}
-
-export interface Channel {
-  id: string;
-  name: string;
-  guildId: string;
-}
-
-export interface LogEntry {
-  id: string;
-  type: string;
-  guildId: string;
-  channelId?: string;
-  userId?: string;
-  timestamp: Date;
-  data: Record<string, unknown>;
-}
-
 // Event Categories
 export type EventCategory =
   | 'channel'
@@ -43,31 +22,41 @@ export type EventCategory =
   | 'user'
   | 'webhook';
 
-// Guild Config
-export interface IGuildConfig {
-  guildId: string;
-  eventCategory: EventCategory;
-  logChannelId: string | null;
+export const ALL_EVENT_CATEGORIES: EventCategory[] = [
+  'channel', 'guild', 'member', 'message', 'reaction', 'role', 'voice',
+  'thread', 'emoji', 'sticker', 'invite', 'scheduled', 'stage', 'ban',
+  'automod', 'interaction', 'presence', 'user', 'webhook'
+];
+
+// Category Config (embedded in Guild)
+export interface ICategoryConfig {
+  channelId: string | null;
   enabled: boolean;
-  createdAt: Date;
-  updatedAt: Date;
 }
 
-export interface IGuildConfigDocument extends IGuildConfig, Document {}
-
-// Filter
-export interface IFilter {
-  guildId: string;
-  filterType: 'whitelist' | 'blacklist';
+// Filter Entry (embedded in Guild)
+export interface IFilterEntry {
   targetType: 'user' | 'role' | 'channel' | 'category';
   targetId: string;
-  eventCategory: EventCategory | 'all';
+  categories: Array<EventCategory | 'all'>;
+}
+
+// Guild Document (single document per Discord guild)
+export interface IGuild {
+  _id: string; // Discord guild ID
+  categories: Record<EventCategory, ICategoryConfig>;
+  filters: {
+    whitelist: IFilterEntry[];
+    blacklist: IFilterEntry[];
+  };
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface IFilterDocument extends IFilter, Document {}
+// For Mongoose - use string _id
+export type IGuildDocument = IGuild & Document;
 
+// Filter check params (used by shouldLog)
 export interface FilterCheckParams {
   userId?: string;
   channelId?: string;

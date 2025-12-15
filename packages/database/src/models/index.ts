@@ -1,3 +1,2 @@
-export { GuildConfig } from './GuildConfig';
-export { Filter } from './Filter';
+export { Guild } from './Guild';
 export { ErrorLog } from './ErrorLog';

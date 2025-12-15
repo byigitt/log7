@@ -5,7 +5,7 @@ import {
   ChannelType,
 } from 'discord.js';
 import { EventCategory } from '@log7/shared';
-import { GuildConfigService, FilterService } from '@log7/database';
+import { GuildService } from '@log7/database';
 import { Command } from '../../types';
 import { ALL_CATEGORIES } from '../../constants';
 import { logger } from '../../utils';
@@ -246,7 +246,7 @@ async function handleSetup(interaction: ChatInputCommandInteraction, guildId: st
   const category = interaction.options.getString('category', true) as EventCategory;
   const channel = interaction.options.getChannel('channel', true);
 
-  await GuildConfigService.set(guildId, category, channel.id);
+  await GuildService.setLogChannel(guildId, category, channel.id);
   await interaction.reply({
     content: `Logging for **${category}** events is now enabled in ${channel}.`,
     ephemeral: true,
@@ -256,7 +256,7 @@ async function handleSetup(interaction: ChatInputCommandInteraction, guildId: st
 async function handleDisable(interaction: ChatInputCommandInteraction, guildId: string) {
   const category = interaction.options.getString('category', true) as EventCategory;
 
-  await GuildConfigService.disable(guildId, category);
+  await GuildService.disableCategory(guildId, category);
   await interaction.reply({
     content: `Logging for **${category}** events has been disabled.`,
     ephemeral: true,
@@ -264,7 +264,7 @@ async function handleDisable(interaction: ChatInputCommandInteraction, guildId: 
 }
 
 async function handleStatus(interaction: ChatInputCommandInteraction, guildId: string) {
-  const configs = await GuildConfigService.getAll(guildId);
+  const configs = await GuildService.getEnabledCategories(guildId);
 
   if (configs.length === 0) {
     await interaction.reply({
@@ -275,9 +275,9 @@ async function handleStatus(interaction: ChatInputCommandInteraction, guildId: s
   }
 
   const lines = configs.map((c) => {
-    const status = c.enabled ? '✅' : '❌';
-    const channel = c.logChannelId ? `<#${c.logChannelId}>` : 'Not set';
-    return `${status} **${c.eventCategory}**: ${channel}`;
+    const status = c.config.enabled ? '✅' : '❌';
+    const channel = c.config.channelId ? `<#${c.config.channelId}>` : 'Not set';
+    return `${status} **${c.category}**: ${channel}`;
   });
 
   await interaction.reply({
@@ -289,7 +289,7 @@ async function handleStatus(interaction: ChatInputCommandInteraction, guildId: s
 async function handleReset(interaction: ChatInputCommandInteraction, guildId: string) {
   const category = interaction.options.getString('category') as EventCategory | null;
 
-  await GuildConfigService.reset(guildId, category || undefined);
+  await GuildService.resetCategory(guildId, category || undefined);
 
   const msg = category
     ? `Logging configuration for **${category}** has been reset.`
@@ -311,7 +311,7 @@ async function handleFilterCommand(
     const targetType = interaction.options.getString('type', true) as 'user' | 'role' | 'channel' | 'category';
     const targetId = interaction.options.getString('target', true);
 
-    await FilterService.add(guildId, filterType, targetType, targetId, eventCategory);
+    await GuildService.addFilter(guildId, filterType, targetType, targetId, eventCategory);
     await interaction.reply({
       content: `Added ${targetType} \`${targetId}\` to ${filterType} for ${!eventCategoryOption ? 'all categories' : eventCategory}.`,
       ephemeral: true,
@@ -320,7 +320,7 @@ async function handleFilterCommand(
     const targetType = interaction.options.getString('type', true) as 'user' | 'role' | 'channel' | 'category';
     const targetId = interaction.options.getString('target', true);
 
-    const removed = await FilterService.remove(guildId, targetType, targetId, eventCategory);
+    const removed = await GuildService.removeFilter(guildId, targetType, targetId, eventCategory);
     await interaction.reply({
       content: removed
         ? `Removed ${targetType} \`${targetId}\` from ${filterType}.`
@@ -328,7 +328,7 @@ async function handleFilterCommand(
       ephemeral: true,
     });
   } else if (subcommand === 'list') {
-    const filters = await FilterService.list(guildId, filterType, eventCategoryOption ? eventCategoryOption as EventCategory : undefined);
+    const filters = await GuildService.listFilters(guildId, filterType, eventCategoryOption ? eventCategoryOption as EventCategory : undefined);
 
     if (filters.length === 0) {
       await interaction.reply({
@@ -338,7 +338,7 @@ async function handleFilterCommand(
       return;
     }
 
-    const lines = filters.map((f) => `• **${f.targetType}**: \`${f.targetId}\` (${f.eventCategory})`);
+    const lines = filters.map((f) => `• **${f.targetType}**: \`${f.targetId}\` (${f.categories.join(', ')})`);
     await interaction.reply({
       content: `**${filterType.charAt(0).toUpperCase() + filterType.slice(1)} Entries**\n\n${lines.join('\n')}`,
       ephemeral: true,

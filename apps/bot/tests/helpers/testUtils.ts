@@ -1,6 +1,6 @@
 import { vi } from 'vitest';
 import { Client, TextChannel, EmbedBuilder, Role, GuildEmoji, Invite, ThreadChannel, ChannelType, GuildBan, Sticker, StickerFormatType, GuildScheduledEvent, GuildScheduledEventStatus, GuildScheduledEventEntityType, StageInstance, StageInstancePrivacyLevel, AutoModerationRule, AutoModerationRuleTriggerType, AutoModerationRuleEventType, AutoModerationActionType } from 'discord.js';
-import { GuildConfigService, FilterService } from '@log7/database';
+import { GuildService } from '@log7/database';
 import { EventCategory } from '@log7/shared';
 import { createMockClient, addMockChannel } from '../mocks/client';
 import { createMockTextChannel } from '../mocks/channel';
@@ -33,20 +33,20 @@ export async function createTestContext(category: EventCategory): Promise<TestCo
   const client = createMockClient();
   const logChannel = createMockTextChannel({ id: TEST_IDS.LOG_CHANNEL, guildId: TEST_IDS.GUILD });
   addMockChannel(client, logChannel);
-  await GuildConfigService.set(TEST_IDS.GUILD, category, TEST_IDS.LOG_CHANNEL);
+  await GuildService.setLogChannel(TEST_IDS.GUILD, category, TEST_IDS.LOG_CHANNEL);
   return { client, logChannel, guildId: TEST_IDS.GUILD };
 }
 
 export async function disableCategory(category: EventCategory): Promise<void> {
-  await GuildConfigService.disable(TEST_IDS.GUILD, category);
+  await GuildService.disableCategory(TEST_IDS.GUILD, category);
 }
 
 export async function blacklistUser(category: EventCategory | 'all', userId = TEST_IDS.USER): Promise<void> {
-  await FilterService.add(TEST_IDS.GUILD, 'blacklist', 'user', userId, category);
+  await GuildService.addFilter(TEST_IDS.GUILD, 'blacklist', 'user', userId, category);
 }
 
 export async function blacklistChannel(category: EventCategory | 'all', channelId = TEST_IDS.CHANNEL): Promise<void> {
-  await FilterService.add(TEST_IDS.GUILD, 'blacklist', 'channel', channelId, category);
+  await GuildService.addFilter(TEST_IDS.GUILD, 'blacklist', 'channel', channelId, category);
 }
 
 // Assertions
