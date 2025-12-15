@@ -2,7 +2,7 @@ services:
   bot:
     build:
       context: ..
-      dockerfile: infra/Dockerfile
+      dockerfile: infra/docker/bot.Dockerfile
     restart: unless-stopped
     env_file:
       - ../.env
@@ -11,6 +11,31 @@ services:
     depends_on:
       - mongodb
 
+  backend:
+    build:
+      context: ..
+      dockerfile: infra/docker/backend.Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongodb
+
+  frontend:
+    build:
+      context: ..
+      dockerfile: infra/docker/frontend.Dockerfile
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
   mongodb:
     image: mongo:7
     restart: unless-stopped
@@ -18,6 +43,8 @@ services:
       - mongodb_data:/data/db
     environment:
       - MONGO_INITDB_DATABASE=log7
+    ports:
+      - "27017:27017"
 
 volumes:
   mongodb_data:

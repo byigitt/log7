@@ -1,0 +1,13 @@
+services:
+  mongodb:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=log7
+    ports:
+      - "27017:27017"
+
+volumes:
+  mongodb_data:

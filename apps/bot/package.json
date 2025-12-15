@@ -1,0 +1,36 @@
+{
+  "name": "@log7/bot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Discord event logging bot",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "npx ts-node src/index.ts",
+    "deploy": "npx ts-node src/commands/deploy.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "npx vitest run",
+    "test:watch": "npx vitest",
+    "test:coverage": "npx vitest run --coverage",
+    "test:events": "npx vitest run tests/events",
+    "test:unit": "npx vitest run tests/unit",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@log7/shared": "workspace:*",
+    "@log7/database": "workspace:*",
+    "discord.js": "^14.16.3",
+    "mongoose": "^8.8.3",
+    "dotenv": "^16.4.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@vitest/coverage-v8": "^2.1.8",
+    "mongodb-memory-server": "^10.1.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8",
+    "rimraf": "^6.0.1"
+  }
+}

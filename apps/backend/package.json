@@ -1,0 +1,23 @@
+{
+  "name": "@log7/backend",
+  "version": "1.0.0",
+  "private": true,
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "echo 'Backend not yet implemented'",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "test": "echo 'Tests not yet configured'",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@log7/shared": "workspace:*",
+    "@log7/database": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2",
+    "rimraf": "^6.0.1"
+  }
+}

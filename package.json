@@ -1,35 +1,29 @@
 {
-  "name": "log7",
+  "name": "@log7/monorepo",
   "version": "1.0.0",
-  "description": "Fully customizable Discord event logging bot",
-  "main": "dist/index.js",
+  "private": true,
+  "description": "Fully customizable Discord event logging bot with dashboard",
   "scripts": {
-    "build": "tsc",
-    "start": "node dist/index.js",
-    "dev": "ts-node src/index.ts",
-    "deploy": "ts-node src/commands/deploy.ts",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
-    "test:events": "vitest run tests/events",
-    "test:unit": "vitest run tests/unit"
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "dev:bot": "turbo run dev --filter=@log7/bot",
+    "dev:frontend": "turbo run dev --filter=@log7/frontend",
+    "dev:backend": "turbo run dev --filter=@log7/backend",
+    "start": "turbo run start",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "test:coverage": "turbo run test:coverage",
+    "lint": "turbo run lint",
+    "clean": "turbo run clean && rimraf node_modules"
   },
-  "keywords": ["discord", "bot", "logging", "events"],
+  "keywords": ["discord", "bot", "logging", "events", "monorepo"],
   "license": "MIT",
-  "dependencies": {
-    "discord.js": "^14.16.3",
-    "mongoose": "^8.8.3",
-    "dotenv": "^16.4.7"
-  },
   "devDependencies": {
-    "@types/node": "^22.10.2",
-    "@vitest/coverage-v8": "^2.1.8",
-    "mongodb-memory-server": "^10.1.2",
-    "ts-node": "^10.9.2",
+    "turbo": "^2.3.3",
     "typescript": "^5.7.2",
-    "vitest": "^2.1.8"
+    "rimraf": "^6.0.1"
   },
+  "packageManager": "pnpm@9.14.4",
   "engines": {
     "node": ">=18.0.0"
   }

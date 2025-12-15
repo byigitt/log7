@@ -1,0 +1,20 @@
+{
+  "name": "@log7/frontend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "echo 'Frontend not yet implemented'",
+    "build": "echo 'Frontend not yet implemented'",
+    "typecheck": "tsc --noEmit",
+    "lint": "echo 'Lint not yet configured'",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@log7/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2",
+    "rimraf": "^6.0.1"
+  }
+}
